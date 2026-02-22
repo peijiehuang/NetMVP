@@ -102,4 +102,14 @@ public interface ISysUserService
     /// 更新用户角色
     /// </summary>
     Task UpdateUserRolesAsync(long userId, long[] roleIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取已分配该角色的用户列表
+    /// </summary>
+    Task<(List<UserDto> users, int total)> GetAllocatedUserListAsync(long roleId, string? userName, string? phonenumber, int pageNum, int pageSize, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取未分配该角色的用户列表
+    /// </summary>
+    Task<(List<UserDto> users, int total)> GetUnallocatedUserListAsync(long roleId, string? userName, string? phonenumber, int pageNum, int pageSize, CancellationToken cancellationToken = default);
 }

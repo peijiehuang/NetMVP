@@ -51,4 +51,9 @@ public interface ISysDeptService
     /// 检查部门名称唯一性
     /// </summary>
     Task<bool> CheckDeptNameUniqueAsync(string deptName, long parentId, long? excludeDeptId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取角色已选部门ID列表
+    /// </summary>
+    Task<List<long>> GetDeptIdsByRoleIdAsync(long roleId, CancellationToken cancellationToken = default);
 }

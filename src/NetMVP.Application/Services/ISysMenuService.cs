@@ -48,6 +48,11 @@ public interface ISysMenuService
     Task<List<MenuTreeDto>> GetMenuTreeByRoleIdAsync(long roleId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 获取角色已选菜单ID列表
+    /// </summary>
+    Task<List<long>> GetMenuIdsByRoleIdAsync(long roleId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 获取用户路由
     /// </summary>
     Task<List<RouterDto>> GetRoutersByUserIdAsync(long userId, CancellationToken cancellationToken = default);

@@ -347,4 +347,16 @@ public class SysDeptService : ISysDeptService
     }
 
     #endregion
+
+    /// <summary>
+    /// 获取角色已选部门ID列表
+    /// </summary>
+    public async Task<List<long>> GetDeptIdsByRoleIdAsync(long roleId, CancellationToken cancellationToken = default)
+    {
+        var dbContext = _userRepository.GetDbContext();
+        return await dbContext.Set<SysRoleDept>()
+            .Where(rd => rd.RoleId == roleId)
+            .Select(rd => rd.DeptId)
+            .ToListAsync(cancellationToken);
+    }
 }

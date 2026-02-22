@@ -15,6 +15,11 @@ public class UserDto
     public long? DeptId { get; set; }
     
     /// <summary>
+    /// 部门名称（用于分配用户列表显示）
+    /// </summary>
+    public string? DeptName { get; set; }
+    
+    /// <summary>
     /// 部门对象（前端期望 dept.deptName 格式）
     /// </summary>
     public DeptInfo? Dept { get; set; }

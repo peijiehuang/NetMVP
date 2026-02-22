@@ -739,4 +739,130 @@ public class SysUserService : ISysUserService
         // 清除用户权限缓存
         await ClearUserCacheAsync(userId);
     }
+
+    /// <summary>
+    /// 获取已分配该角色的用户列表
+    /// </summary>
+    public async Task<(List<UserDto> users, int total)> GetAllocatedUserListAsync(
+        long roleId, 
+        string? userName, 
+        string? phonenumber, 
+        int pageNum, 
+        int pageSize, 
+        CancellationToken cancellationToken = default)
+    {
+        var dbContext = _userRepository.GetDbContext();
+        
+        // 查询已分配该角色的用户
+        var query = from u in dbContext.Set<SysUser>()
+                    join ur in dbContext.Set<SysUserRole>() on u.UserId equals ur.UserId
+                    where ur.RoleId == roleId && u.DelFlag == DelFlag.Exist
+                    select u;
+
+        // 用户名筛选
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            query = query.Where(u => u.UserName.Contains(userName));
+        }
+
+        // 手机号筛选
+        if (!string.IsNullOrWhiteSpace(phonenumber))
+        {
+            query = query.Where(u => u.PhoneNumberValue != null && u.PhoneNumberValue.Contains(phonenumber));
+        }
+
+        // 获取总数
+        var total = await query.CountAsync(cancellationToken);
+
+        // 分页查询
+        var users = await query
+            .OrderBy(u => u.UserId)
+            .Skip((pageNum - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var userDtos = _mapper.Map<List<UserDto>>(users);
+
+        // 填充部门和角色信息
+        foreach (var userDto in userDtos)
+        {
+            // 获取部门信息
+            if (userDto.DeptId.HasValue)
+            {
+                var dept = await dbContext.Set<SysDept>()
+                    .FirstOrDefaultAsync(d => d.DeptId == userDto.DeptId.Value, cancellationToken);
+                if (dept != null)
+                {
+                    userDto.DeptName = dept.DeptName;
+                }
+            }
+        }
+
+        return (userDtos, total);
+    }
+
+    /// <summary>
+    /// 获取未分配该角色的用户列表
+    /// </summary>
+    public async Task<(List<UserDto> users, int total)> GetUnallocatedUserListAsync(
+        long roleId, 
+        string? userName, 
+        string? phonenumber, 
+        int pageNum, 
+        int pageSize, 
+        CancellationToken cancellationToken = default)
+    {
+        var dbContext = _userRepository.GetDbContext();
+        
+        // 获取已分配该角色的用户ID列表
+        var allocatedUserIds = await dbContext.Set<SysUserRole>()
+            .Where(ur => ur.RoleId == roleId)
+            .Select(ur => ur.UserId)
+            .ToListAsync(cancellationToken);
+
+        // 查询未分配该角色的用户
+        var query = dbContext.Set<SysUser>()
+            .Where(u => u.DelFlag == DelFlag.Exist && !allocatedUserIds.Contains(u.UserId));
+
+        // 用户名筛选
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            query = query.Where(u => u.UserName.Contains(userName));
+        }
+
+        // 手机号筛选
+        if (!string.IsNullOrWhiteSpace(phonenumber))
+        {
+            query = query.Where(u => u.PhoneNumberValue != null && u.PhoneNumberValue.Contains(phonenumber));
+        }
+
+        // 获取总数
+        var total = await query.CountAsync(cancellationToken);
+
+        // 分页查询
+        var users = await query
+            .OrderBy(u => u.UserId)
+            .Skip((pageNum - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var userDtos = _mapper.Map<List<UserDto>>(users);
+
+        // 填充部门信息
+        foreach (var userDto in userDtos)
+        {
+            // 获取部门信息
+            if (userDto.DeptId.HasValue)
+            {
+                var dept = await dbContext.Set<SysDept>()
+                    .FirstOrDefaultAsync(d => d.DeptId == userDto.DeptId.Value, cancellationToken);
+                if (dept != null)
+                {
+                    userDto.DeptName = dept.DeptName;
+                }
+            }
+        }
+
+        return (userDtos, total);
+    }
 }

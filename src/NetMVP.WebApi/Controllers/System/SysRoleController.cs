@@ -17,10 +17,17 @@ namespace NetMVP.WebApi.Controllers.System;
 public class SysRoleController : BaseController
 {
     private readonly ISysRoleService _roleService;
+    private readonly ISysDeptService _deptService;
+    private readonly ISysUserService _userService;
 
-    public SysRoleController(ISysRoleService roleService)
+    public SysRoleController(
+        ISysRoleService roleService,
+        ISysDeptService deptService,
+        ISysUserService userService)
     {
         _roleService = roleService;
+        _deptService = deptService;
+        _userService = userService;
     }
 
     /// <summary>
@@ -164,6 +171,119 @@ public class SysRoleController : BaseController
         var isUnique = await _roleService.CheckRoleKeyUniqueAsync(roleKey, roleId);
         return Success(isUnique);
     }
+
+    /// <summary>
+    /// 获取对应角色部门树列表
+    /// </summary>
+    [HttpGet("deptTree/{roleId}")]
+    [RequirePermission("system:role:query")]
+    public async Task<AjaxResult> DeptTree(long roleId)
+    {
+        var result = Success();
+        result.Put("checkedKeys", await _deptService.GetDeptIdsByRoleIdAsync(roleId));
+        result.Put("depts", await _deptService.GetDeptTreeSelectAsync());
+        return result;
+    }
+
+    /// <summary>
+    /// 修改保存数据权限
+    /// </summary>
+    [HttpPut("dataScope")]
+    [RequirePermission("system:role:edit")]
+    [Log(Title = "角色管理", BusinessType = BusinessType.Update)]
+    public async Task<AjaxResult> DataScope([FromBody] DataScopeDto dto)
+    {
+        try
+        {
+            await _roleService.UpdateDataScopeAsync(dto.RoleId, dto.DataScope, dto.DeptIds);
+            return Success();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Error(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// 查询已分配用户角色列表
+    /// </summary>
+    [HttpGet("authUser/allocatedList")]
+    [RequirePermission("system:role:list")]
+    public async Task<TableDataInfo> AllocatedList([FromQuery] AllocatedUserQueryDto query)
+    {
+        var (users, total) = await _userService.GetAllocatedUserListAsync(
+            query.RoleId, query.UserName, query.Phonenumber, query.PageNum, query.PageSize);
+        return GetTableData(users, total);
+    }
+
+    /// <summary>
+    /// 查询未分配用户角色列表
+    /// </summary>
+    [HttpGet("authUser/unallocatedList")]
+    [RequirePermission("system:role:list")]
+    public async Task<TableDataInfo> UnallocatedList([FromQuery] UnallocatedUserQueryDto query)
+    {
+        var (users, total) = await _userService.GetUnallocatedUserListAsync(
+            query.RoleId, query.UserName, query.Phonenumber, query.PageNum, query.PageSize);
+        return GetTableData(users, total);
+    }
+
+    /// <summary>
+    /// 取消授权用户
+    /// </summary>
+    [HttpPut("authUser/cancel")]
+    [RequirePermission("system:role:edit")]
+    [Log(Title = "角色管理", BusinessType = BusinessType.Grant)]
+    public async Task<AjaxResult> CancelAuthUser([FromBody] UserRoleDto dto)
+    {
+        try
+        {
+            await _roleService.CancelAuthUserAsync(dto.RoleId, dto.UserId);
+            return Success();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Error(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// 批量取消授权用户
+    /// </summary>
+    [HttpPut("authUser/cancelAll")]
+    [RequirePermission("system:role:edit")]
+    [Log(Title = "角色管理", BusinessType = BusinessType.Grant)]
+    public async Task<AjaxResult> CancelAuthUserAll([FromQuery] long roleId, [FromQuery] long[] userIds)
+    {
+        try
+        {
+            await _roleService.CancelAuthUsersAsync(roleId, userIds);
+            return Success();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Error(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// 批量选择用户授权
+    /// </summary>
+    [HttpPut("authUser/selectAll")]
+    [RequirePermission("system:role:edit")]
+    [Log(Title = "角色管理", BusinessType = BusinessType.Grant)]
+    public async Task<AjaxResult> SelectAuthUserAll([FromQuery] long roleId, [FromQuery] long[] userIds)
+    {
+        try
+        {
+            await _roleService.InsertAuthUsersAsync(roleId, userIds);
+            return Success();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Error(ex.Message);
+        }
+    }
 }
 
 /// <summary>
@@ -173,4 +293,47 @@ public class ChangeStatusDto
 {
     public long RoleId { get; set; }
     public UserStatus Status { get; set; } = UserStatus.Normal;
+}
+
+/// <summary>
+/// 数据权限 DTO
+/// </summary>
+public class DataScopeDto
+{
+    public long RoleId { get; set; }
+    public string DataScope { get; set; } = string.Empty;
+    public List<long> DeptIds { get; set; } = new();
+}
+
+/// <summary>
+/// 用户角色 DTO
+/// </summary>
+public class UserRoleDto
+{
+    public long UserId { get; set; }
+    public long RoleId { get; set; }
+}
+
+/// <summary>
+/// 已分配用户查询 DTO
+/// </summary>
+public class AllocatedUserQueryDto
+{
+    public long RoleId { get; set; }
+    public string? UserName { get; set; }
+    public string? Phonenumber { get; set; }
+    public int PageNum { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
+
+/// <summary>
+/// 未分配用户查询 DTO
+/// </summary>
+public class UnallocatedUserQueryDto
+{
+    public long RoleId { get; set; }
+    public string? UserName { get; set; }
+    public string? Phonenumber { get; set; }
+    public int PageNum { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
 }

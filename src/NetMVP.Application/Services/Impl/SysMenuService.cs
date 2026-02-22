@@ -228,6 +228,48 @@ public class SysMenuService : ISysMenuService
     }
 
     /// <summary>
+    /// 获取角色已选菜单ID列表
+    /// </summary>
+    public async Task<List<long>> GetMenuIdsByRoleIdAsync(long roleId, CancellationToken cancellationToken = default)
+    {
+        var dbContext = _userRepository.GetDbContext();
+        
+        // 获取角色信息，判断是否需要父子联动
+        var role = await dbContext.Set<SysRole>()
+            .Where(r => r.RoleId == roleId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (role == null)
+        {
+            return new List<long>();
+        }
+
+        // 获取角色已选菜单ID
+        var roleMenuIds = await dbContext.Set<SysRoleMenu>()
+            .Where(rm => rm.RoleId == roleId)
+            .Select(rm => rm.MenuId)
+            .ToListAsync(cancellationToken);
+
+        // 如果菜单树选择项关联显示（父子联动），则排除父节点，只返回叶子节点
+        if (role.MenuCheckStrictly)
+        {
+            // 查找在角色已选菜单中作为父节点的菜单ID
+            // 即：在角色已选菜单中，如果某个菜单的parent_id也在已选菜单中，则该parent_id应该被排除
+            var parentIdsInRoleMenus = await (
+                from m in dbContext.Set<SysMenu>()
+                join rm in dbContext.Set<SysRoleMenu>() on m.MenuId equals rm.MenuId
+                where rm.RoleId == roleId
+                select m.ParentId
+            ).Distinct().ToListAsync(cancellationToken);
+
+            // 排除那些既在roleMenuIds中又在parentIdsInRoleMenus中的ID（即父节点）
+            roleMenuIds = roleMenuIds.Where(id => !parentIdsInRoleMenus.Contains(id)).ToList();
+        }
+
+        return roleMenuIds;
+    }
+
+    /// <summary>
     /// 获取用户路由
     /// </summary>
     public async Task<List<RouterDto>> GetRoutersByUserIdAsync(long userId, CancellationToken cancellationToken = default)

@@ -135,8 +135,17 @@ public class SysMenuController : BaseController
     [HttpGet("roleMenuTreeselect/{roleId}")]
     public async Task<AjaxResult> RoleMenuTreeSelect(long roleId)
     {
-        var tree = await _menuService.GetMenuTreeByRoleIdAsync(roleId);
-        return Success(new { checkedKeys = new List<long>(), menus = tree });
+        // 获取所有菜单树
+        var menuTree = await _menuService.GetMenuTreeSelectAsync();
+        
+        // 获取角色已选菜单ID列表
+        var checkedKeys = await _menuService.GetMenuIdsByRoleIdAsync(roleId);
+
+        // 使用 Put 方法将数据添加到顶层，而不是嵌套在 data 中
+        var result = Success();
+        result.Put("checkedKeys", checkedKeys);
+        result.Put("menus", menuTree);
+        return result;
     }
 
     /// <summary>

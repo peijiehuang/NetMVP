@@ -52,4 +52,24 @@ public interface ISysRoleService
     /// 检查角色权限字符串唯一性
     /// </summary>
     Task<bool> CheckRoleKeyUniqueAsync(string roleKey, long? excludeRoleId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 更新角色数据权限范围
+    /// </summary>
+    Task UpdateDataScopeAsync(long roleId, string dataScope, List<long> deptIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 取消单个用户的角色授权
+    /// </summary>
+    Task CancelAuthUserAsync(long roleId, long userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 批量取消用户的角色授权
+    /// </summary>
+    Task CancelAuthUsersAsync(long roleId, long[] userIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 批量给用户授予角色
+    /// </summary>
+    Task InsertAuthUsersAsync(long roleId, long[] userIds, CancellationToken cancellationToken = default);
 }

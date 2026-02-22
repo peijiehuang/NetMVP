@@ -17,19 +17,22 @@ public class SysRoleService : ISysRoleService
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPermissionService _permissionService;
+    private readonly ISysMenuService _menuService;
 
     public SysRoleService(
         IRepository<SysRole> roleRepository,
         IRepository<SysUser> userRepository,
         IMapper mapper,
         IUnitOfWork unitOfWork,
-        IPermissionService permissionService)
+        IPermissionService permissionService,
+        ISysMenuService menuService)
     {
         _roleRepository = roleRepository;
         _userRepository = userRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
         _permissionService = permissionService;
+        _menuService = menuService;
     }
 
     /// <summary>
@@ -103,7 +106,8 @@ public class SysRoleService : ISysRoleService
         }
 
         var roleDto = _mapper.Map<RoleDto>(role);
-        roleDto.MenuIds = await GetRoleMenuIdsAsync(roleId, cancellationToken);
+        // 使用 MenuService 的方法获取菜单ID，该方法会根据 MenuCheckStrictly 处理父子联动
+        roleDto.MenuIds = await _menuService.GetMenuIdsByRoleIdAsync(roleId, cancellationToken);
         roleDto.DeptIds = await GetRoleDeptIdsAsync(roleId, cancellationToken);
 
         return roleDto;
@@ -135,6 +139,7 @@ public class SysRoleService : ISysRoleService
             MenuCheckStrictly = dto.MenuCheckStrictly,
             DeptCheckStrictly = dto.DeptCheckStrictly,
             Status = dto.Status,
+            DelFlag = DelFlag.Exist,  // 显式设置删除标志
             Remark = dto.Remark
         };
 
@@ -429,4 +434,124 @@ public class SysRoleService : ISysRoleService
     }
 
     #endregion
+
+    /// <summary>
+    /// 更新角色数据权限范围
+    /// </summary>
+    public async Task UpdateDataScopeAsync(long roleId, string dataScope, List<long> deptIds, CancellationToken cancellationToken = default)
+    {
+        var role = await _roleRepository.GetByIdAsync(roleId, cancellationToken);
+        if (role == null)
+        {
+            throw new InvalidOperationException("角色不存在");
+        }
+
+        // 将字符串转换为 DataScopeType 枚举
+        role.DataScope = dataScope switch
+        {
+            "1" => DataScopeType.All,
+            "2" => DataScopeType.Custom,
+            "3" => DataScopeType.Department,
+            "4" => DataScopeType.DepartmentAndBelow,
+            "5" => DataScopeType.Self,
+            _ => DataScopeType.All
+        };
+        await _roleRepository.UpdateAsync(role, cancellationToken);
+
+        // 删除旧的部门权限
+        await DeleteRoleDeptsAsync(roleId, cancellationToken);
+
+        // 保存新的部门权限（仅当数据范围为自定义时）
+        if (dataScope == "2" && deptIds.Any())
+        {
+            await SaveRoleDeptsAsync(roleId, deptIds, cancellationToken);
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// 取消单个用户的角色授权
+    /// </summary>
+    public async Task CancelAuthUserAsync(long roleId, long userId, CancellationToken cancellationToken = default)
+    {
+        var dbContext = _userRepository.GetDbContext();
+        var userRole = await dbContext.Set<SysUserRole>()
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId, cancellationToken);
+
+        if (userRole != null)
+        {
+            dbContext.Set<SysUserRole>().Remove(userRole);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _permissionService.ClearUserPermissionCacheAsync(userId);
+        }
+    }
+
+    /// <summary>
+    /// 批量取消用户的角色授权
+    /// </summary>
+    public async Task CancelAuthUsersAsync(long roleId, long[] userIds, CancellationToken cancellationToken = default)
+    {
+        var dbContext = _userRepository.GetDbContext();
+        var userRoles = await dbContext.Set<SysUserRole>()
+            .Where(ur => ur.RoleId == roleId && userIds.Contains(ur.UserId))
+            .ToListAsync(cancellationToken);
+
+        if (userRoles.Any())
+        {
+            foreach (var userRole in userRoles)
+            {
+                dbContext.Set<SysUserRole>().Remove(userRole);
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // 清除用户权限缓存
+            foreach (var userId in userIds)
+            {
+                await _permissionService.ClearUserPermissionCacheAsync(userId);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 批量给用户授予角色
+    /// </summary>
+    public async Task InsertAuthUsersAsync(long roleId, long[] userIds, CancellationToken cancellationToken = default)
+    {
+        // 检查角色是否存在
+        var role = await _roleRepository.GetByIdAsync(roleId, cancellationToken);
+        if (role == null)
+        {
+            throw new InvalidOperationException("角色不存在");
+        }
+
+        var dbContext = _userRepository.GetDbContext();
+        
+        // 获取已存在的用户角色关系
+        var existingUserRoles = await dbContext.Set<SysUserRole>()
+            .Where(ur => ur.RoleId == roleId && userIds.Contains(ur.UserId))
+            .Select(ur => ur.UserId)
+            .ToListAsync(cancellationToken);
+
+        // 只添加不存在的用户角色关系
+        var newUserIds = userIds.Except(existingUserRoles).ToList();
+        if (newUserIds.Any())
+        {
+            foreach (var userId in newUserIds)
+            {
+                dbContext.Set<SysUserRole>().Add(new SysUserRole
+                {
+                    UserId = userId,
+                    RoleId = roleId
+                });
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // 清除用户权限缓存
+            foreach (var userId in newUserIds)
+            {
+                await _permissionService.ClearUserPermissionCacheAsync(userId);
+            }
+        }
+    }
 }

@@ -24,8 +24,8 @@ public class SysRoleConfiguration : IEntityTypeConfiguration<SysRole>
         builder.Property(e => e.DataScope).HasColumnName("data_scope").HasConversion(EnumConverters.DataScopeTypeConverter).HasDefaultValue(DataScopeType.All);
         builder.Property(e => e.MenuCheckStrictly).HasColumnName("menu_check_strictly").HasDefaultValue(true);
         builder.Property(e => e.DeptCheckStrictly).HasColumnName("dept_check_strictly").HasDefaultValue(true);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter).HasDefaultValue(UserStatus.Normal);
-        builder.Property(e => e.DelFlag).HasColumnName("del_flag").HasConversion(EnumConverters.DelFlagConverter).HasDefaultValue(DelFlag.Exist);
+        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter);
+        builder.Property(e => e.DelFlag).HasColumnName("del_flag").HasConversion(EnumConverters.DelFlagConverter);
 
         // BaseEntity 字段
         builder.Property(e => e.CreateBy).HasColumnName("create_by").HasMaxLength(64);
