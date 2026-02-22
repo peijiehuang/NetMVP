@@ -17,7 +17,7 @@ namespace NetMVP.Application.Tests.Services;
 public class SysMenuServiceTests
 {
     private readonly Mock<IRepository<SysMenu>> _menuRepositoryMock;
-    private readonly Mock<IRepository<SysUser>> _userRepositoryMock;
+    private readonly Mock<ISysUserRepository> _userRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPermissionService> _permissionServiceMock;
     private readonly IMapper _mapper;
@@ -26,7 +26,7 @@ public class SysMenuServiceTests
     public SysMenuServiceTests()
     {
         _menuRepositoryMock = new Mock<IRepository<SysMenu>>();
-        _userRepositoryMock = new Mock<IRepository<SysUser>>();
+        _userRepositoryMock = new Mock<ISysUserRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _permissionServiceMock = new Mock<IPermissionService>();
 
