@@ -1,0 +1,15 @@
+using NetMVP.Domain.Entities;
+using NetMVP.Domain.Interfaces;
+using NetMVP.Infrastructure.Data;
+
+namespace NetMVP.Infrastructure.Repositories;
+
+/// <summary>
+/// {{ function_name }}仓储实现
+/// </summary>
+public class {{ class_name }}Repository : Repository<{{ class_name }}>, I{{ class_name }}Repository
+{
+    public {{ class_name }}Repository(ApplicationDbContext context) : base(context)
+    {
+    }
+}

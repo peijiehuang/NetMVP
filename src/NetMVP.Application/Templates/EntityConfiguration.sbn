@@ -1,0 +1,34 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Entities;
+
+namespace NetMVP.Infrastructure.Data.Configurations;
+
+/// <summary>
+/// {{ function_name }}实体配置
+/// </summary>
+public class {{ class_name }}Configuration : IEntityTypeConfiguration<{{ class_name }}>
+{
+    public void Configure(EntityTypeBuilder<{{ class_name }}> builder)
+    {
+        builder.ToTable("{{ table_name }}");
+
+        builder.HasKey(x => x.{{ pk_column }});
+
+{{~ for column in columns ~}}
+{{~ if column.is_pk || column.column_name == "create_by" || column.column_name == "create_time" || column.column_name == "update_by" || column.column_name == "update_time" || column.column_name == "remark" ~}}
+{{~ continue ~}}
+{{~ end ~}}
+        builder.Property(x => x.{{ column.csharp_field }})
+            .HasColumnName("{{ column.column_name }}")
+{{~ if column.column_type == "varchar" || column.column_type == "char" ~}}
+            .HasMaxLength({{ column.column_length }})
+{{~ end ~}}
+{{~ if column.is_required ~}}
+            .IsRequired()
+{{~ end ~}}
+            .HasComment("{{ column.column_comment }}");
+
+{{~ end ~}}
+    }
+}

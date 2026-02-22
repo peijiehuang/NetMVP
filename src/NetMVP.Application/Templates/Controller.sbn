@@ -1,0 +1,93 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using NetMVP.Application.Common.Models;
+using NetMVP.Application.DTOs.{{ module_name }};
+using NetMVP.Application.Services;
+
+namespace NetMVP.WebApi.Controllers.{{ module_name }};
+
+/// <summary>
+/// {{ function_name }}管理
+/// </summary>
+[ApiController]
+[Route("{{ business_name }}")]
+[Authorize]
+public class {{ class_name }}Controller : ControllerBase
+{
+    private readonly I{{ class_name }}Service _service;
+
+    public {{ class_name }}Controller(I{{ class_name }}Service service)
+    {
+        _service = service;
+    }
+
+    /// <summary>
+    /// 获取{{ function_name }}列表
+    /// </summary>
+    [HttpGet("list")]
+    public async Task<ApiResponse> GetList([FromQuery] {{ class_name }}QueryDto query)
+    {
+        var (list, total) = await _service.GetListAsync(query);
+        return ApiResponse.Success(new { rows = list, total });
+    }
+
+    /// <summary>
+    /// 获取{{ function_name }}详情
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<ApiResponse> GetById(long id)
+    {
+        var data = await _service.GetByIdAsync(id);
+        return data == null ? ApiResponse.Error("{{ function_name }}不存在") : ApiResponse.Success(data);
+    }
+
+    /// <summary>
+    /// 创建{{ function_name }}
+    /// </summary>
+    [HttpPost]
+    public async Task<ApiResponse> Create([FromBody] Create{{ class_name }}Dto dto)
+    {
+        var id = await _service.CreateAsync(dto);
+        return ApiResponse.Success(id);
+    }
+
+    /// <summary>
+    /// 更新{{ function_name }}
+    /// </summary>
+    [HttpPut]
+    public async Task<ApiResponse> Update([FromBody] Update{{ class_name }}Dto dto)
+    {
+        await _service.UpdateAsync(dto);
+        return ApiResponse.Success();
+    }
+
+    /// <summary>
+    /// 删除{{ function_name }}
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<ApiResponse> Delete(long id)
+    {
+        await _service.DeleteAsync(id);
+        return ApiResponse.Success();
+    }
+
+    /// <summary>
+    /// 批量删除{{ function_name }}
+    /// </summary>
+    [HttpDelete("batch")]
+    public async Task<ApiResponse> DeleteBatch([FromBody] long[] ids)
+    {
+        await _service.DeleteBatchAsync(ids);
+        return ApiResponse.Success();
+    }
+
+    /// <summary>
+    /// 导出{{ function_name }}
+    /// </summary>
+    [HttpPost("export")]
+    public async Task<IActionResult> Export([FromBody] {{ class_name }}QueryDto query)
+    {
+        var data = await _service.ExportAsync(query);
+        return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "{{ function_name }}.xlsx");
+    }
+}

@@ -1,0 +1,6 @@
+@NetMVP.WebApi_HostAddress = http://localhost:5204
+
+GET {{NetMVP.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

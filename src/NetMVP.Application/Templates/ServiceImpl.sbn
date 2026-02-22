@@ -1,0 +1,101 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using NetMVP.Application.DTOs.{{ module_name }};
+using NetMVP.Domain.Entities;
+using NetMVP.Domain.Interfaces;
+
+namespace NetMVP.Application.Services.Impl;
+
+/// <summary>
+/// {{ function_name }}服务实现
+/// </summary>
+public class {{ class_name }}Service : I{{ class_name }}Service
+{
+    private readonly I{{ class_name }}Repository _repository;
+    private readonly IMapper _mapper;
+    private readonly IExcelService _excelService;
+
+    public {{ class_name }}Service(
+        I{{ class_name }}Repository repository,
+        IMapper mapper,
+        IExcelService excelService)
+    {
+        _repository = repository;
+        _mapper = mapper;
+        _excelService = excelService;
+    }
+
+    public async Task<(List<{{ class_name }}Dto> list, int total)> GetListAsync(
+        {{ class_name }}QueryDto query,
+        CancellationToken cancellationToken = default)
+    {
+        var queryable = _repository.GetQueryable();
+
+        // TODO: 添加查询条件
+
+        var total = await queryable.CountAsync(cancellationToken);
+        var items = await queryable
+            .OrderByDescending(x => x.CreateTime)
+            .Skip((query.PageNum - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var dtos = _mapper.Map<List<{{ class_name }}Dto>>(items);
+        return (dtos, total);
+    }
+
+    public async Task<{{ class_name }}Dto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+    {
+        var entity = await _repository.GetByIdAsync(id, cancellationToken);
+        return entity == null ? null : _mapper.Map<{{ class_name }}Dto>(entity);
+    }
+
+    public async Task<long> CreateAsync(Create{{ class_name }}Dto dto, CancellationToken cancellationToken = default)
+    {
+        var entity = _mapper.Map<{{ class_name }}>(dto);
+        await _repository.AddAsync(entity, cancellationToken);
+        return entity.{{ pk_column }};
+    }
+
+    public async Task UpdateAsync(Update{{ class_name }}Dto dto, CancellationToken cancellationToken = default)
+    {
+        var entity = await _repository.GetByIdAsync(dto.{{ pk_column }}, cancellationToken);
+        if (entity == null)
+        {
+            throw new Exception("{{ function_name }}不存在");
+        }
+
+        _mapper.Map(dto, entity);
+        await _repository.UpdateAsync(entity, cancellationToken);
+    }
+
+    public async Task DeleteAsync(long id, CancellationToken cancellationToken = default)
+    {
+        await _repository.DeleteAsync(id, cancellationToken);
+    }
+
+    public async Task DeleteBatchAsync(long[] ids, CancellationToken cancellationToken = default)
+    {
+        foreach (var id in ids)
+        {
+            await DeleteAsync(id, cancellationToken);
+        }
+    }
+
+    public async Task<byte[]> ExportAsync({{ class_name }}QueryDto query, CancellationToken cancellationToken = default)
+    {
+        var queryable = _repository.GetQueryable();
+
+        // TODO: 添加查询条件
+
+        var items = await queryable
+            .OrderByDescending(x => x.CreateTime)
+            .ToListAsync(cancellationToken);
+
+        var dtos = _mapper.Map<List<{{ class_name }}Dto>>(items);
+
+        using var stream = new MemoryStream();
+        await _excelService.ExportAsync(dtos, stream, cancellationToken);
+        return stream.ToArray();
+    }
+}

@@ -1,0 +1,10 @@
+using NetMVP.Domain.Entities;
+
+namespace NetMVP.Domain.Interfaces;
+
+/// <summary>
+/// {{ function_name }}仓储接口
+/// </summary>
+public interface I{{ class_name }}Repository : IRepository<{{ class_name }}>
+{
+}

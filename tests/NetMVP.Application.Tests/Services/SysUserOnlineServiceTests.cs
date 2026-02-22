@@ -1,0 +1,129 @@
+using FluentAssertions;
+using Moq;
+using NetMVP.Application.DTOs.UserOnline;
+using NetMVP.Application.Services.Impl;
+using NetMVP.Domain.Interfaces;
+using System.Text.Json;
+using Xunit;
+
+namespace NetMVP.Application.Tests.Services;
+
+/// <summary>
+/// 在线用户服务测试
+/// </summary>
+public class SysUserOnlineServiceTests
+{
+    private readonly Mock<ICacheService> _cacheServiceMock;
+    private readonly Mock<IJwtService> _jwtServiceMock;
+    private readonly SysUserOnlineService _service;
+
+    public SysUserOnlineServiceTests()
+    {
+        _cacheServiceMock = new Mock<ICacheService>();
+        _jwtServiceMock = new Mock<IJwtService>();
+        _service = new SysUserOnlineService(_cacheServiceMock.Object, _jwtServiceMock.Object);
+    }
+
+    [Fact]
+    public async Task GetOnlineUserListAsync_ShouldReturnEmptyList_WhenNoOnlineUsers()
+    {
+        // Arrange
+        var query = new OnlineUserQueryDto { PageNum = 1, PageSize = 10 };
+        _cacheServiceMock.Setup(x => x.GetKeysAsync("online_user:*", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<string>());
+
+        // Act
+        var (users, total) = await _service.GetOnlineUserListAsync(query);
+
+        // Assert
+        users.Should().BeEmpty();
+        total.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetOnlineUserListAsync_ShouldReturnFilteredUsers_WhenUserNameProvided()
+    {
+        // Arrange
+        var query = new OnlineUserQueryDto { PageNum = 1, PageSize = 10, UserName = "admin" };
+        
+        var onlineUser1 = new OnlineUserDto
+        {
+            TokenId = "token1",
+            UserId = 1,
+            UserName = "admin",
+            Ipaddr = "127.0.0.1",
+            LoginTime = DateTime.Now
+        };
+        
+        var onlineUser2 = new OnlineUserDto
+        {
+            TokenId = "token2",
+            UserId = 2,
+            UserName = "user",
+            Ipaddr = "127.0.0.1",
+            LoginTime = DateTime.Now
+        };
+
+        _cacheServiceMock.Setup(x => x.GetKeysAsync("online_user:*", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<string> { "online_user:token1", "online_user:token2" });
+        
+        _cacheServiceMock.Setup(x => x.GetAsync<string>("online_user:token1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(JsonSerializer.Serialize(onlineUser1));
+        
+        _cacheServiceMock.Setup(x => x.GetAsync<string>("online_user:token2", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(JsonSerializer.Serialize(onlineUser2));
+
+        // Act
+        var (users, total) = await _service.GetOnlineUserListAsync(query);
+
+        // Assert
+        users.Should().HaveCount(1);
+        users[0].UserName.Should().Be("admin");
+        total.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ForceLogoutAsync_ShouldAddTokenToBlacklistAndRemoveOnlineUser()
+    {
+        // Arrange
+        var tokenId = "test-token-id";
+
+        // Act
+        await _service.ForceLogoutAsync(tokenId);
+
+        // Assert
+        _cacheServiceMock.Verify(x => x.SetAsync(
+            $"token_blacklist:{tokenId}",
+            "revoked",
+            TimeSpan.FromHours(24),
+            It.IsAny<CancellationToken>()), Times.Once);
+
+        _cacheServiceMock.Verify(x => x.RemoveAsync(
+            $"online_user:{tokenId}",
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task BatchForceLogoutAsync_ShouldForceLogoutMultipleUsers()
+    {
+        // Arrange
+        var tokenIds = new[] { "token1", "token2", "token3" };
+
+        // Act
+        await _service.BatchForceLogoutAsync(tokenIds);
+
+        // Assert
+        foreach (var tokenId in tokenIds)
+        {
+            _cacheServiceMock.Verify(x => x.SetAsync(
+                $"token_blacklist:{tokenId}",
+                "revoked",
+                TimeSpan.FromHours(24),
+                It.IsAny<CancellationToken>()), Times.Once);
+
+            _cacheServiceMock.Verify(x => x.RemoveAsync(
+                $"online_user:{tokenId}",
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+    }
+}

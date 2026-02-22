@@ -1,0 +1,95 @@
+using NetMVP.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
+
+namespace NetMVP.Application.DTOs.Menu;
+
+/// <summary>
+/// 更新菜单 DTO
+/// </summary>
+public class UpdateMenuDto
+{
+    /// <summary>
+    /// 菜单ID
+    /// </summary>
+    [Required(ErrorMessage = "菜单ID不能为空")]
+    public long MenuId { get; set; }
+
+    /// <summary>
+    /// 菜单名称
+    /// </summary>
+    [Required(ErrorMessage = "菜单名称不能为空")]
+    [StringLength(50, ErrorMessage = "菜单名称长度不能超过50个字符")]
+    public string MenuName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 父菜单ID
+    /// </summary>
+    public long ParentId { get; set; } = 0;
+
+    /// <summary>
+    /// 显示顺序
+    /// </summary>
+    public int OrderNum { get; set; }
+
+    /// <summary>
+    /// 路由地址
+    /// </summary>
+    [StringLength(200, ErrorMessage = "路由地址长度不能超过200个字符")]
+    public string? Path { get; set; }
+
+    /// <summary>
+    /// 组件路径
+    /// </summary>
+    [StringLength(255, ErrorMessage = "组件路径长度不能超过255个字符")]
+    public string? Component { get; set; }
+
+    /// <summary>
+    /// 路由参数
+    /// </summary>
+    [StringLength(255, ErrorMessage = "路由参数长度不能超过255个字符")]
+    public string? Query { get; set; }
+
+    /// <summary>
+    /// 是否为外链
+    /// </summary>
+    public bool IsFrame { get; set; } = false;
+
+    /// <summary>
+    /// 是否缓存
+    /// </summary>
+    public bool IsCache { get; set; } = false;
+
+    /// <summary>
+    /// 菜单类型
+    /// </summary>
+    [Required(ErrorMessage = "菜单类型不能为空")]
+    public MenuType MenuType { get; set; } = MenuType.Menu;
+
+    /// <summary>
+    /// 显示状态
+    /// </summary>
+    public VisibleStatus Visible { get; set; } = VisibleStatus.Show;
+
+    /// <summary>
+    /// 菜单状态
+    /// </summary>
+    public UserStatus Status { get; set; } = UserStatus.Normal;
+
+    /// <summary>
+    /// 权限标识
+    /// </summary>
+    [StringLength(100, ErrorMessage = "权限标识长度不能超过100个字符")]
+    public string? Perms { get; set; }
+
+    /// <summary>
+    /// 菜单图标
+    /// </summary>
+    [StringLength(100, ErrorMessage = "菜单图标长度不能超过100个字符")]
+    public string? Icon { get; set; }
+
+    /// <summary>
+    /// 备注
+    /// </summary>
+    [StringLength(500, ErrorMessage = "备注长度不能超过500个字符")]
+    public string? Remark { get; set; }
+}

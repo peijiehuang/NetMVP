@@ -1,0 +1,44 @@
+using NetMVP.Application.DTOs.{{ module_name }};
+
+namespace NetMVP.Application.Services;
+
+/// <summary>
+/// {{ function_name }}服务接口
+/// </summary>
+public interface I{{ class_name }}Service
+{
+    /// <summary>
+    /// 获取{{ function_name }}列表
+    /// </summary>
+    Task<(List<{{ class_name }}Dto> list, int total)> GetListAsync({{ class_name }}QueryDto query, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 根据ID获取{{ function_name }}
+    /// </summary>
+    Task<{{ class_name }}Dto?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 创建{{ function_name }}
+    /// </summary>
+    Task<long> CreateAsync(Create{{ class_name }}Dto dto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 更新{{ function_name }}
+    /// </summary>
+    Task UpdateAsync(Update{{ class_name }}Dto dto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 删除{{ function_name }}
+    /// </summary>
+    Task DeleteAsync(long id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 批量删除{{ function_name }}
+    /// </summary>
+    Task DeleteBatchAsync(long[] ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 导出{{ function_name }}
+    /// </summary>
+    Task<byte[]> ExportAsync({{ class_name }}QueryDto query, CancellationToken cancellationToken = default);
+}

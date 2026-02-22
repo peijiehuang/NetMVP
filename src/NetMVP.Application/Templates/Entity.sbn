@@ -1,0 +1,20 @@
+using NetMVP.Domain.Common;
+
+namespace NetMVP.Domain.Entities;
+
+/// <summary>
+/// {{ class_comment }}
+/// </summary>
+public class {{ class_name }} : BaseEntity
+{
+{{~ for column in columns ~}}
+{{~ if column.is_pk || column.column_name == "create_by" || column.column_name == "create_time" || column.column_name == "update_by" || column.column_name == "update_time" || column.column_name == "remark" ~}}
+{{~ continue ~}}
+{{~ end ~}}
+    /// <summary>
+    /// {{ column.column_comment }}
+    /// </summary>
+    public {{ column.csharp_type }}{{ if column.is_nullable }}?{{ end }} {{ column.csharp_field }} { get; set; }
+
+{{~ end ~}}
+}
