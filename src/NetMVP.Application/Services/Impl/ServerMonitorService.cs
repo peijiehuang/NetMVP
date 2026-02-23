@@ -22,7 +22,7 @@ public class ServerMonitorService : IServerMonitorService
             Mem = GetMemoryInfo(),
             Sys = GetSystemInfo(),
             Runtime = GetRuntimeInfo(),
-            Disks = GetDiskInfo()
+            SysFiles = GetDiskInfo()
         };
 
         return serverInfo;
@@ -392,10 +392,22 @@ public class ServerMonitorService : IServerMonitorService
                     var free = drive.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0);
                     var used = total - free;
 
+                    // 获取驱动器类型描述
+                    var typeName = drive.DriveType switch
+                    {
+                        DriveType.Fixed => "本地磁盘",
+                        DriveType.Network => "网络驱动器",
+                        DriveType.CDRom => "光盘驱动器",
+                        DriveType.Removable => "可移动磁盘",
+                        DriveType.Ram => "RAM磁盘",
+                        _ => "未知"
+                    };
+
                     diskList.Add(new DiskInfo
                     {
                         DirName = drive.Name,
                         SysTypeName = drive.DriveFormat,
+                        TypeName = typeName,
                         Total = Math.Round(total, 2),
                         Used = Math.Round(used, 2),
                         Free = Math.Round(free, 2),

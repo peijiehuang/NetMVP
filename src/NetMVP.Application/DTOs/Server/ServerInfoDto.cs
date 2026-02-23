@@ -28,7 +28,7 @@ public class ServerInfoDto
     /// <summary>
     /// 磁盘信息列表
     /// </summary>
-    public List<DiskInfo> Disks { get; set; } = new();
+    public List<DiskInfo> SysFiles { get; set; } = new();
 }
 
 /// <summary>
@@ -144,6 +144,11 @@ public class DiskInfo
     /// 文件系统类型
     /// </summary>
     public string SysTypeName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 盘符类型（如：本地磁盘）
+    /// </summary>
+    public string TypeName { get; set; } = string.Empty;
 
     /// <summary>
     /// 总大小（GB）

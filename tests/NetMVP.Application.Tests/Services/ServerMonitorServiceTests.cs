@@ -24,7 +24,7 @@ public class ServerMonitorServiceTests
         result.Mem.Should().NotBeNull();
         result.Sys.Should().NotBeNull();
         result.Runtime.Should().NotBeNull();
-        result.Disks.Should().NotBeNull();
+        result.SysFiles.Should().NotBeNull();
     }
 
     [Fact]
@@ -86,11 +86,11 @@ public class ServerMonitorServiceTests
         var result = await _service.GetServerInfoAsync();
 
         // Assert
-        result.Disks.Should().NotBeNull();
+        result.SysFiles.Should().NotBeNull();
         
-        if (result.Disks.Count > 0)
+        if (result.SysFiles.Count > 0)
         {
-            foreach (var disk in result.Disks)
+            foreach (var disk in result.SysFiles)
             {
                 disk.DirName.Should().NotBeNullOrEmpty();
                 disk.Total.Should().BeGreaterThan(0);
