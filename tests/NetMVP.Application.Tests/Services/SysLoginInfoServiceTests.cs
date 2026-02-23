@@ -15,6 +15,7 @@ public class SysLoginInfoServiceTests
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<IExcelService> _mockExcelService;
     private readonly Mock<ICacheService> _mockCacheService;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly SysLoginInfoService _service;
 
     public SysLoginInfoServiceTests()
@@ -23,11 +24,13 @@ public class SysLoginInfoServiceTests
         _mockMapper = new Mock<IMapper>();
         _mockExcelService = new Mock<IExcelService>();
         _mockCacheService = new Mock<ICacheService>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
         _service = new SysLoginInfoService(
             _mockRepository.Object,
             _mockMapper.Object,
             _mockExcelService.Object,
-            _mockCacheService.Object);
+            _mockCacheService.Object,
+            _mockUnitOfWork.Object);
     }
 
     [Fact]

@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using NetMVP.Application.Converters;
 
 namespace NetMVP.Application.DTOs.Job;
 
@@ -38,16 +40,19 @@ public class CreateJobDto
     /// <summary>
     /// 计划执行错误策略（1立即执行 2执行一次 3放弃执行）
     /// </summary>
+    [JsonConverter(typeof(FlexibleStringConverter))]
     public string MisfirePolicy { get; set; } = "3";
 
     /// <summary>
     /// 是否并发执行（0允许 1禁止）
     /// </summary>
+    [JsonConverter(typeof(FlexibleStringConverter))]
     public string Concurrent { get; set; } = "1";
 
     /// <summary>
     /// 状态（0正常 1暂停）
     /// </summary>
+    [JsonConverter(typeof(FlexibleStringConverter))]
     public string Status { get; set; } = "0";
 
     /// <summary>

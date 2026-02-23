@@ -1,4 +1,6 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMVP.Infrastructure.Configuration;
 using NetMVP.Infrastructure.Services.Auth;
@@ -28,12 +30,16 @@ public class JwtServiceTests
         var cacheServiceMock = new Moq.Mock<NetMVP.Domain.Interfaces.ICacheService>();
         var userRepositoryMock = new Moq.Mock<NetMVP.Domain.Interfaces.ISysUserRepository>();
         var deptRepositoryMock = new Moq.Mock<NetMVP.Domain.Interfaces.ISysDeptRepository>();
+        var httpContextAccessorMock = new Moq.Mock<IHttpContextAccessor>();
+        var loggerMock = new Moq.Mock<ILogger<JwtService>>();
         
         _jwtService = new JwtService(
             optionsMock, 
             cacheServiceMock.Object, 
             userRepositoryMock.Object, 
-            deptRepositoryMock.Object);
+            deptRepositoryMock.Object,
+            httpContextAccessorMock.Object,
+            loggerMock.Object);
     }
 
     [Fact]

@@ -18,6 +18,7 @@ public class SysOperLogServiceTests
 {
     private readonly Mock<ISysOperLogRepository> _operLogRepositoryMock;
     private readonly Mock<IExcelService> _excelServiceMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly IMapper _mapper;
     private readonly SysOperLogService _service;
 
@@ -25,6 +26,7 @@ public class SysOperLogServiceTests
     {
         _operLogRepositoryMock = new Mock<ISysOperLogRepository>();
         _excelServiceMock = new Mock<IExcelService>();
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
         _mapper = config.CreateMapper();
@@ -32,7 +34,8 @@ public class SysOperLogServiceTests
         _service = new SysOperLogService(
             _operLogRepositoryMock.Object,
             _excelServiceMock.Object,
-            _mapper);
+            _mapper,
+            _unitOfWorkMock.Object);
     }
 
     [Fact]

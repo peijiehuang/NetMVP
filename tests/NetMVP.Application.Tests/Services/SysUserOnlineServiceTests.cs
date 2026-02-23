@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NetMVP.Application.DTOs.UserOnline;
 using NetMVP.Application.Services.Impl;
@@ -15,13 +16,15 @@ public class SysUserOnlineServiceTests
 {
     private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IJwtService> _jwtServiceMock;
+    private readonly Mock<ILogger<SysUserOnlineService>> _loggerMock;
     private readonly SysUserOnlineService _service;
 
     public SysUserOnlineServiceTests()
     {
         _cacheServiceMock = new Mock<ICacheService>();
         _jwtServiceMock = new Mock<IJwtService>();
-        _service = new SysUserOnlineService(_cacheServiceMock.Object, _jwtServiceMock.Object);
+        _loggerMock = new Mock<ILogger<SysUserOnlineService>>();
+        _service = new SysUserOnlineService(_cacheServiceMock.Object, _jwtServiceMock.Object, _loggerMock.Object);
     }
 
     [Fact]
@@ -52,7 +55,7 @@ public class SysUserOnlineServiceTests
             UserId = 1,
             UserName = "admin",
             Ipaddr = "127.0.0.1",
-            LoginTime = DateTime.Now
+            LoginTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
         };
         
         var onlineUser2 = new OnlineUserDto
@@ -61,7 +64,7 @@ public class SysUserOnlineServiceTests
             UserId = 2,
             UserName = "user",
             Ipaddr = "127.0.0.1",
-            LoginTime = DateTime.Now
+            LoginTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
         };
 
         _cacheServiceMock.Setup(x => x.GetKeysAsync("online_user:*", It.IsAny<CancellationToken>()))

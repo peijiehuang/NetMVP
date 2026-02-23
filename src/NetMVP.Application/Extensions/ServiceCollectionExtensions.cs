@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using NetMVP.Application.Jobs;
 using NetMVP.Application.Mappings;
 using NetMVP.Application.Services;
 using NetMVP.Application.Services.Gen;
@@ -35,6 +36,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IServerMonitorService, ServerMonitorService>();
         services.AddScoped<ISysJobService, SysJobService>();
         services.AddScoped<ISysJobLogService, SysJobLogService>();
+        
+        // 添加任务类
+        services.AddScoped<DemoTask>();
+        
         services.AddScoped<IGenTableService, GenTableService>();
         services.AddScoped<ICodeGeneratorService, CodeGeneratorService>();
         services.AddScoped<IFileService, FileService>();

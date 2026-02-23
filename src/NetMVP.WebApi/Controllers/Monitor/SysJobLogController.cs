@@ -25,7 +25,7 @@ public class SysJobLogController : BaseController
     public async Task<IActionResult> GetList([FromQuery] JobLogQueryDto query)
     {
         var result = await _jobLogService.GetJobLogListAsync(query);
-        return Ok(Success(result));
+        return Ok(GetTableData(result.Rows, result.Total));
     }
 
     /// <summary>

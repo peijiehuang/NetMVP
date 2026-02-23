@@ -172,6 +172,9 @@ public static class ServiceCollectionExtensions
 
         // 添加调度服务
         services.AddScoped<ISchedulerService, SchedulerService>();
+        
+        // 添加任务初始化服务（程序启动时加载任务）
+        services.AddHostedService<JobInitializationService>();
 
         // 添加 JWT 认证
         var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>();
