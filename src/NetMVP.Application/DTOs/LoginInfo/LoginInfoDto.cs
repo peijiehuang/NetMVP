@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.DTOs.LoginInfo;
@@ -20,6 +21,7 @@ public class LoginInfoDto
     /// <summary>
     /// 登录IP
     /// </summary>
+    [JsonPropertyName("ipaddr")]
     public string IpAddr { get; set; } = string.Empty;
 
     /// <summary>

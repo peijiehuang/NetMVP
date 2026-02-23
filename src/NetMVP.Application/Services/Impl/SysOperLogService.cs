@@ -14,15 +14,18 @@ public class SysOperLogService : ISysOperLogService
     private readonly ISysOperLogRepository _operLogRepository;
     private readonly IExcelService _excelService;
     private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
 
     public SysOperLogService(
         ISysOperLogRepository operLogRepository,
         IExcelService excelService,
-        IMapper mapper)
+        IMapper mapper,
+        IUnitOfWork unitOfWork)
     {
         _operLogRepository = operLogRepository;
         _excelService = excelService;
         _mapper = mapper;
+        _unitOfWork = unitOfWork;
     }
 
     /// <inheritdoc/>
@@ -109,6 +112,7 @@ public class SysOperLogService : ISysOperLogService
         };
 
         await _operLogRepository.AddAsync(log, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return log.OperId;
     }
 
@@ -120,6 +124,7 @@ public class SysOperLogService : ISysOperLogService
         if (log != null)
         {
             await _operLogRepository.DeleteAsync(log, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -136,6 +141,7 @@ public class SysOperLogService : ISysOperLogService
     public async Task CleanOperLogAsync(CancellationToken cancellationToken = default)
     {
         await _operLogRepository.CleanAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

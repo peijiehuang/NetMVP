@@ -29,7 +29,7 @@ public class LoginLogFilter : IAsyncActionFilter
 
         // 只处理登录和登出请求
         var path = request.Path.Value?.ToLower() ?? "";
-        if (!path.Contains("/login") && !path.Contains("/logout"))
+        if (path != "/login" && path != "/logout")
         {
             await next();
             return;
@@ -100,17 +100,15 @@ public class LoginLogFilter : IAsyncActionFilter
         }
 
         // 异步保存日志（不影响主流程）
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await _loginInfoService.CreateLoginInfoAsync(logDto);
-            }
-            catch
-            {
-                // 日志记录失败不影响业务
-            }
-        });
+            await _loginInfoService.CreateLoginInfoAsync(logDto);
+        }
+        catch (Exception ex)
+        {
+            // 日志记录失败不影响业务，但记录到控制台以便调试
+            Console.WriteLine($"保存登录日志失败: {ex.Message}");
+        }
     }
 
     /// <summary>

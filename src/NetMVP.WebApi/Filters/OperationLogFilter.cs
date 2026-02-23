@@ -125,17 +125,15 @@ public class OperationLogFilter : IAsyncActionFilter
         }
 
         // 异步保存日志（不影响主流程）
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await _operLogService.CreateOperLogAsync(logDto);
-            }
-            catch
-            {
-                // 日志记录失败不影响业务
-            }
-        });
+            await _operLogService.CreateOperLogAsync(logDto);
+        }
+        catch (Exception ex)
+        {
+            // 日志记录失败不影响业务，但记录到控制台以便调试
+            Console.WriteLine($"保存操作日志失败: {ex.Message}");
+        }
     }
 
     /// <summary>

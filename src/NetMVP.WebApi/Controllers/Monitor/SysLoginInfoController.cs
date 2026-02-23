@@ -24,10 +24,10 @@ public class SysLoginInfoController : BaseController
     /// 获取登录日志列表
     /// </summary>
     [HttpGet("list")]
-    public async Task<AjaxResult> GetList([FromQuery] LoginInfoQueryDto query)
+    public async Task<TableDataInfo> GetList([FromQuery] LoginInfoQueryDto query)
     {
         var (list, total) = await _loginInfoService.GetLoginInfoListAsync(query);
-        return Success(TableDataInfo.Build(list, total));
+        return TableDataInfo.Build(list, total);
     }
 
     /// <summary>

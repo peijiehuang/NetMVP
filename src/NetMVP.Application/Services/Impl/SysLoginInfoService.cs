@@ -16,17 +16,20 @@ public class SysLoginInfoService : ISysLoginInfoService
     private readonly IMapper _mapper;
     private readonly IExcelService _excelService;
     private readonly ICacheService _cacheService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public SysLoginInfoService(
         ISysLoginInfoRepository loginInfoRepository,
         IMapper mapper,
         IExcelService excelService,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        IUnitOfWork unitOfWork)
     {
         _loginInfoRepository = loginInfoRepository;
         _mapper = mapper;
         _excelService = excelService;
         _cacheService = cacheService;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -112,6 +115,7 @@ public class SysLoginInfoService : ISysLoginInfoService
         };
 
         await _loginInfoRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return entity.InfoId;
     }
 
@@ -128,6 +132,7 @@ public class SysLoginInfoService : ISysLoginInfoService
             return false;
 
         await _loginInfoRepository.DeleteAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }
 
