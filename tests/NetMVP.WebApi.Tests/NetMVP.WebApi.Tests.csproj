@@ -25,9 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\NetMVP.WebApi\NetMVP.WebApi.csproj" />
-    <ProjectReference Include="..\..\src\NetMVP.Application\NetMVP.Application.csproj" />
-    <ProjectReference Include="..\..\src\NetMVP.Domain\NetMVP.Domain.csproj" />
-    <ProjectReference Include="..\..\src\NetMVP.Infrastructure\NetMVP.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
