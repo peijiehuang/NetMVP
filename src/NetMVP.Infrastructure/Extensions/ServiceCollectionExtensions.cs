@@ -73,36 +73,25 @@ public static class ServiceCollectionExtensions
         services.Configure<CacheOptions>(options => cacheSection.Bind(options));
         cacheSection.Bind(cacheOptions);
 
-        // 根据配置添加缓存服务
-        if (cacheOptions.CacheType.Equals("Redis", StringComparison.OrdinalIgnoreCase))
+        // 添加 Redis 连接
+        if (!string.IsNullOrEmpty(cacheOptions.RedisConnection))
         {
-            // 添加 Redis 连接
-            if (!string.IsNullOrEmpty(cacheOptions.RedisConnection))
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
-                services.AddSingleton<IConnectionMultiplexer>(sp =>
-                {
-                    var redisConfig = ConfigurationOptions.Parse(cacheOptions.RedisConnection);
-                    redisConfig.AbortOnConnectFail = false;
-                    return ConnectionMultiplexer.Connect(redisConfig);
-                });
-                
-                services.AddSingleton<ICacheService, RedisCacheService>();
-                
-                // 只在使用 Redis 时添加缓存监控服务
-                services.AddScoped<ICacheMonitorService, CacheMonitorService>();
-            }
-            else
-            {
-                // Redis 配置为空，降级到内存缓存
-                services.AddMemoryCache();
-                services.AddSingleton<ICacheService, MemoryCacheService>();
-            }
+                var redisConfig = ConfigurationOptions.Parse(cacheOptions.RedisConnection);
+                redisConfig.AbortOnConnectFail = false;
+                redisConfig.AllowAdmin = true; // 启用管理命令，用于缓存监控
+                return ConnectionMultiplexer.Connect(redisConfig);
+            });
+            
+            services.AddSingleton<ICacheService, RedisCacheService>();
+            
+            // 添加缓存监控服务
+            services.AddScoped<ICacheMonitorService, CacheMonitorService>();
         }
         else
         {
-            // 使用内存缓存
-            services.AddMemoryCache();
-            services.AddSingleton<ICacheService, MemoryCacheService>();
+            throw new InvalidOperationException("Redis连接字符串未配置，请在appsettings.json中配置Cache:RedisConnection");
         }
 
         // 添加审计拦截器

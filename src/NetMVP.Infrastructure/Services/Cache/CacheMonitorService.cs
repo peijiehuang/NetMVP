@@ -38,14 +38,50 @@ public class CacheMonitorService : ICacheMonitorService
         {
             var server = _redis.GetServer(endpoints[0]);
             
-            // 获取Redis信息
+            // 获取Redis基本信息
             var info = await server.InfoAsync();
             foreach (var section in info)
             {
                 foreach (var item in section)
                 {
-                    result.Info[$"{section.Key}:{item.Key}"] = item.Value;
+                    // 只保留键名，不带section前缀，以匹配前端期望的格式
+                    result.Info[item.Key] = item.Value;
                 }
+            }
+
+            // 单独获取命令统计信息 - 使用 server.Execute 直接调用 INFO commandstats
+            try
+            {
+                var commandStatsResult = await server.ExecuteAsync("INFO", "commandstats");
+                if (commandStatsResult != null && !commandStatsResult.IsNull)
+                {
+                    var commandStatsText = commandStatsResult.ToString();
+                    if (!string.IsNullOrEmpty(commandStatsText))
+                    {
+                        // 解析 INFO commandstats 的文本输出
+                        // 格式: cmdstat_get:calls=123,usec=456,usec_per_call=3.78,rejected_calls=0,failed_calls=0
+                        var lines = commandStatsText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var line in lines)
+                        {
+                            if (line.StartsWith("cmdstat_"))
+                            {
+                                var colonIndex = line.IndexOf(':');
+                                if (colonIndex > 0)
+                                {
+                                    var key = line.Substring(0, colonIndex);
+                                    var value = line.Substring(colonIndex + 1);
+                                    result.Info[key] = value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断执行
+                // 命令统计可能在某些Redis配置中不可用
+                System.Diagnostics.Debug.WriteLine($"Failed to get command stats: {ex.Message}");
             }
 
             // 获取数据库大小
@@ -55,27 +91,27 @@ public class CacheMonitorService : ICacheMonitorService
                 result.DbSize = (long)dbSizeResult;
             }
 
-            // 获取命令统计
+            // 解析命令统计 - 匹配格式: calls=123,usec=456,...
             var commandStats = result.Info
-                .Where(kv => kv.Key.StartsWith("Commandstats:cmdstat_"))
+                .Where(kv => kv.Key.StartsWith("cmdstat_"))
                 .Select(kv =>
                 {
-                    var name = kv.Key.Replace("Commandstats:cmdstat_", "");
-                    var match = Regex.Match(kv.Value, @"calls=(\d+),usec=(\d+)");
+                    var name = kv.Key.Replace("cmdstat_", "");
+                    // 匹配 calls= 后面的数字，直到遇到逗号或字符串结束
+                    var match = Regex.Match(kv.Value, @"calls=(\d+)(?:,|$)");
                     if (match.Success)
                     {
                         return new CommandStatDto
                         {
                             Name = name,
-                            Calls = long.Parse(match.Groups[1].Value),
-                            Usec = long.Parse(match.Groups[2].Value)
+                            Value = match.Groups[1].Value  // 只取调用次数
                         };
                     }
                     return null;
                 })
                 .Where(x => x != null)
                 .Cast<CommandStatDto>()
-                .OrderByDescending(x => x.Calls)
+                .OrderByDescending(x => long.TryParse(x.Value, out var val) ? val : 0)
                 .Take(10)
                 .ToList();
 
@@ -85,7 +121,7 @@ public class CacheMonitorService : ICacheMonitorService
         return result;
     }
 
-    public async Task<List<string>> GetCacheNamesAsync()
+    public async Task<List<CacheNameDto>> GetCacheNamesAsync()
     {
         var keys = await GetAllKeysAsync();
         var cacheNames = keys
@@ -97,31 +133,63 @@ public class CacheMonitorService : ICacheMonitorService
             })
             .Distinct()
             .OrderBy(x => x)
+            .Select(name => new CacheNameDto
+            {
+                CacheName = name,
+                Remark = GetCacheRemark(name)
+            })
             .ToList();
 
         return cacheNames;
     }
 
-    public async Task<List<CacheKeyDto>> GetCacheKeysAsync(string cacheName)
+    private string GetCacheRemark(string cacheName)
+    {
+        return cacheName switch
+        {
+            "login_tokens" => "用户信息",
+            "sys_config" => "配置信息",
+            "sys_dict" => "数据字典",
+            "captcha_codes" => "验证码",
+            "repeat_submit" => "防重提交",
+            "rate_limit" => "限流处理",
+            "pwd_err_cnt" => "密码错误次数",
+            "online_user" => "在线用户",
+            "refresh_token" => "刷新令牌",
+            "user" => "用户缓存",
+            _ => ""
+        };
+    }
+
+    public async Task<List<string>> GetCacheKeysAsync(string cacheName)
     {
         var pattern = GetKey($"{cacheName}:*");
         var keys = await GetKeysByPatternAsync(pattern);
         
-        var result = keys.Select(k => new CacheKeyDto
-        {
-            CacheName = cacheName,
-            CacheKey = k.Replace(_options.KeyPrefix, ""),
-            Remark = ""
-        }).ToList();
+        var result = keys
+            .Select(k => k.Replace(_options.KeyPrefix, ""))
+            .OrderBy(k => k)
+            .ToList();
 
         return result;
     }
 
-    public async Task<string?> GetCacheValueAsync(string cacheName, string cacheKey)
+    public async Task<CacheValueDto?> GetCacheValueAsync(string cacheName, string cacheKey)
     {
-        var fullKey = $"{cacheName}:{cacheKey}";
+        var fullKey = cacheKey;
         var value = await _cacheService.GetAsync(fullKey);
-        return value;
+        
+        if (value == null)
+        {
+            return null;
+        }
+
+        return new CacheValueDto
+        {
+            CacheName = cacheName.Replace(":", ""),
+            CacheKey = cacheKey.Replace(cacheName, ""),
+            CacheValue = value
+        };
     }
 
     public async Task ClearCacheNameAsync(string cacheName)

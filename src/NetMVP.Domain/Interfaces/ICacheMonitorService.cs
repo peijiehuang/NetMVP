@@ -13,17 +13,17 @@ public interface ICacheMonitorService
     /// <summary>
     /// 获取缓存名称列表
     /// </summary>
-    Task<List<string>> GetCacheNamesAsync();
+    Task<List<CacheNameDto>> GetCacheNamesAsync();
 
     /// <summary>
     /// 获取缓存键列表
     /// </summary>
-    Task<List<CacheKeyDto>> GetCacheKeysAsync(string cacheName);
+    Task<List<string>> GetCacheKeysAsync(string cacheName);
 
     /// <summary>
     /// 获取缓存值
     /// </summary>
-    Task<string?> GetCacheValueAsync(string cacheName, string cacheKey);
+    Task<CacheValueDto?> GetCacheValueAsync(string cacheName, string cacheKey);
 
     /// <summary>
     /// 清空缓存名称
@@ -73,14 +73,46 @@ public class CommandStatDto
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// 调用次数
+    /// 调用次数（用于ECharts图表显示）
     /// </summary>
-    public long Calls { get; set; }
+    public string Value { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// 缓存值DTO
+/// </summary>
+public class CacheValueDto
+{
+    /// <summary>
+    /// 缓存名称
+    /// </summary>
+    public string CacheName { get; set; } = string.Empty;
 
     /// <summary>
-    /// 总耗时（微秒）
+    /// 缓存键名
     /// </summary>
-    public long Usec { get; set; }
+    public string CacheKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 缓存内容
+    /// </summary>
+    public string CacheValue { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// 缓存名称DTO
+/// </summary>
+public class CacheNameDto
+{
+    /// <summary>
+    /// 缓存名称
+    /// </summary>
+    public string CacheName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 备注
+    /// </summary>
+    public string Remark { get; set; } = string.Empty;
 }
 
 /// <summary>

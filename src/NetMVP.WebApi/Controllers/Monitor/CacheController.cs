@@ -57,7 +57,7 @@ public class CacheController : BaseController
     public async Task<AjaxResult> GetCacheValue(string cacheName, string cacheKey)
     {
         var value = await _cacheMonitorService.GetCacheValueAsync(cacheName, cacheKey);
-        return Success(value ?? "");
+        return Success(value);
     }
 
     /// <summary>

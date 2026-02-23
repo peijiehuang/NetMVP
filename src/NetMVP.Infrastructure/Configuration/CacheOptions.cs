@@ -6,11 +6,6 @@ namespace NetMVP.Infrastructure.Configuration;
 public class CacheOptions
 {
     /// <summary>
-    /// 缓存类型（Memory/Redis）
-    /// </summary>
-    public string CacheType { get; set; } = "Memory";
-
-    /// <summary>
     /// 缓存键前缀
     /// </summary>
     public string KeyPrefix { get; set; } = "netmvp:";
