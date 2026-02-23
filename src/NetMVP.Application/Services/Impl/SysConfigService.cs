@@ -88,7 +88,8 @@ public class SysConfigService : ISysConfigService
     /// </summary>
     public async Task<ConfigDto?> GetConfigByIdAsync(int configId, CancellationToken cancellationToken = default)
     {
-        var config = await _configRepository.GetByIdAsync(configId, cancellationToken);
+        var config = await _configRepository.GetQueryable()
+            .FirstOrDefaultAsync(c => c.ConfigId == configId, cancellationToken);
         return config == null ? null : _mapper.Map<ConfigDto>(config);
     }
 
@@ -148,7 +149,8 @@ public class SysConfigService : ISysConfigService
     /// </summary>
     public async Task UpdateConfigAsync(UpdateConfigDto dto, CancellationToken cancellationToken = default)
     {
-        var config = await _configRepository.GetByIdAsync(dto.ConfigId, cancellationToken);
+        var config = await _configRepository.GetQueryable()
+            .FirstOrDefaultAsync(c => c.ConfigId == dto.ConfigId, cancellationToken);
         if (config == null)
         {
             throw new InvalidOperationException("参数不存在");
@@ -181,7 +183,8 @@ public class SysConfigService : ISysConfigService
     /// </summary>
     public async Task DeleteConfigAsync(int configId, CancellationToken cancellationToken = default)
     {
-        var config = await _configRepository.GetByIdAsync(configId, cancellationToken);
+        var config = await _configRepository.GetQueryable()
+            .FirstOrDefaultAsync(c => c.ConfigId == configId, cancellationToken);
         if (config == null)
         {
             throw new InvalidOperationException("参数不存在");
