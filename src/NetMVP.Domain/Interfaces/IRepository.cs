@@ -16,6 +16,11 @@ public interface IRepository<TEntity> where TEntity : BaseEntity
     Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 根据ID获取实体（int类型主键）
+    /// </summary>
+    Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 获取所有实体
     /// </summary>
     Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);

@@ -25,6 +25,11 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
     public virtual async Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet.ToListAsync(cancellationToken);
