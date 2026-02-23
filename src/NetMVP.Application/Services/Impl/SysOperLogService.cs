@@ -179,11 +179,11 @@ public class SysOperLogService : ISysOperLogService
             .OrderByDescending(x => x.OperTime)
             .ToListAsync(cancellationToken);
 
-        var logDtos = _mapper.Map<List<OperLogDto>>(logs);
+        var exportDtos = _mapper.Map<List<ExportOperLogDto>>(logs);
 
         // 导出Excel
         using var stream = new MemoryStream();
-        await _excelService.ExportAsync(logDtos, stream, cancellationToken);
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
         return stream.ToArray();
     }
 }

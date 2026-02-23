@@ -226,11 +226,11 @@ public class SysDictDataService : ISysDictDataService
             .ThenBy(d => d.DictCode)
             .ToListAsync(cancellationToken);
 
-        var dictDataDtos = _mapper.Map<List<DictDataDto>>(dictData);
+        var exportDtos = _mapper.Map<List<ExportDictDataDto>>(dictData);
 
         // 导出到内存流
         using var stream = new MemoryStream();
-        await _excelService.ExportAsync(dictDataDtos, stream, cancellationToken);
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
         return stream.ToArray();
     }
 }

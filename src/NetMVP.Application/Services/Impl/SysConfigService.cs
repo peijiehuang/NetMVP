@@ -274,11 +274,11 @@ public class SysConfigService : ISysConfigService
             .OrderBy(c => c.ConfigId)
             .ToListAsync(cancellationToken);
 
-        var configDtos = _mapper.Map<List<ConfigDto>>(configs);
+        var exportDtos = _mapper.Map<List<ExportConfigDto>>(configs);
 
         // 导出到内存流
         using var stream = new MemoryStream();
-        await _excelService.ExportAsync(configDtos, stream, cancellationToken);
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
         return stream.ToArray();
     }
 

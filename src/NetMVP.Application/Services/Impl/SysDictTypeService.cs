@@ -216,11 +216,11 @@ public class SysDictTypeService : ISysDictTypeService
             .OrderBy(d => d.DictId)
             .ToListAsync(cancellationToken);
 
-        var dictTypeDtos = _mapper.Map<List<DictTypeDto>>(dictTypes);
+        var exportDtos = _mapper.Map<List<ExportDictTypeDto>>(dictTypes);
 
         // 导出到内存流
         using var stream = new MemoryStream();
-        await _excelService.ExportAsync(dictTypeDtos, stream, cancellationToken);
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
         return stream.ToArray();
     }
 

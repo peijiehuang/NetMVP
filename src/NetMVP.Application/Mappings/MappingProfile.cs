@@ -67,14 +67,21 @@ public class MappingProfile : Profile
         // 字典类型映射
         CreateMap<SysDictType, DictTypeDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+        CreateMap<SysDictType, ExportDictTypeDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
         // 字典数据映射
         CreateMap<SysDictData, DictDataDto>()
             .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+        CreateMap<SysDictData, ExportDictDataDto>()
+            .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.IsDefault))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
         // 参数配置映射
         CreateMap<SysConfig, ConfigDto>()
+            .ForMember(dest => dest.ConfigType, opt => opt.MapFrom(src => src.ConfigType.ToString()));
+        CreateMap<SysConfig, ExportConfigDto>()
             .ForMember(dest => dest.ConfigType, opt => opt.MapFrom(src => src.ConfigType.ToString()));
         CreateMap<CreateConfigDto, SysConfig>()
             .ForMember(dest => dest.ConfigType, opt => opt.Ignore());
@@ -90,6 +97,8 @@ public class MappingProfile : Profile
 
         // 操作日志映射
         CreateMap<SysOperLog, OperLogDto>()
+            .ForMember(dest => dest.OperIp, opt => opt.MapFrom(src => src.OperIpValue));
+        CreateMap<SysOperLog, ExportOperLogDto>()
             .ForMember(dest => dest.OperIp, opt => opt.MapFrom(src => src.OperIpValue));
 
         // 登录日志映射
