@@ -40,7 +40,7 @@ public class RedisCacheService : ICacheService
             return default;
         }
 
-        return JsonSerializer.Deserialize<T>(value!, _jsonOptions);
+        return DeserializeValue<T>(value!);
     }
 
     public async Task<string?> GetAsync(string key, CancellationToken cancellationToken = default)
@@ -53,8 +53,8 @@ public class RedisCacheService : ICacheService
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiry = null, CancellationToken cancellationToken = default)
     {
         var fullKey = GetKey(key);
-        var json = JsonSerializer.Serialize(value, _jsonOptions);
-        await _database.StringSetAsync(fullKey, json, expiry ?? _options.DefaultExpiry);
+        var serializedValue = SerializeValue(value);
+        await _database.StringSetAsync(fullKey, serializedValue, expiry ?? _options.DefaultExpiry);
     }
 
     public async Task SetAsync(string key, string value, TimeSpan? expiry = null, CancellationToken cancellationToken = default)
@@ -111,8 +111,8 @@ public class RedisCacheService : ICacheService
     public async Task HashSetAsync<T>(string key, string field, T value, CancellationToken cancellationToken = default)
     {
         var fullKey = GetKey(key);
-        var json = JsonSerializer.Serialize(value, _jsonOptions);
-        await _database.HashSetAsync(fullKey, field, json);
+        var serializedValue = SerializeValue(value);
+        await _database.HashSetAsync(fullKey, field, serializedValue);
     }
 
     public async Task<T?> HashGetAsync<T>(string key, string field, CancellationToken cancellationToken = default)
@@ -125,7 +125,7 @@ public class RedisCacheService : ICacheService
             return default;
         }
 
-        return JsonSerializer.Deserialize<T>(value!, _jsonOptions);
+        return DeserializeValue<T>(value!);
     }
 
     public async Task<Dictionary<string, T>> HashGetAllAsync<T>(string key, CancellationToken cancellationToken = default)
@@ -136,7 +136,7 @@ public class RedisCacheService : ICacheService
         
         foreach (var entry in entries)
         {
-            var value = JsonSerializer.Deserialize<T>(entry.Value!, _jsonOptions);
+            var value = DeserializeValue<T>(entry.Value!);
             if (value != null)
             {
                 result[entry.Name!] = value;
@@ -156,8 +156,8 @@ public class RedisCacheService : ICacheService
     public async Task<long> ListPushAsync<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         var fullKey = GetKey(key);
-        var json = JsonSerializer.Serialize(value, _jsonOptions);
-        return await _database.ListRightPushAsync(fullKey, json);
+        var serializedValue = SerializeValue(value);
+        return await _database.ListRightPushAsync(fullKey, serializedValue);
     }
 
     public async Task<List<T>> ListRangeAsync<T>(string key, long start = 0, long stop = -1, CancellationToken cancellationToken = default)
@@ -170,7 +170,7 @@ public class RedisCacheService : ICacheService
         {
             if (!value.IsNullOrEmpty)
             {
-                var item = JsonSerializer.Deserialize<T>(value!, _jsonOptions);
+                var item = DeserializeValue<T>(value!);
                 if (item != null)
                 {
                     result.Add(item);
@@ -185,8 +185,8 @@ public class RedisCacheService : ICacheService
     public async Task<bool> SetAddAsync<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         var fullKey = GetKey(key);
-        var json = JsonSerializer.Serialize(value, _jsonOptions);
-        return await _database.SetAddAsync(fullKey, json);
+        var serializedValue = SerializeValue(value);
+        return await _database.SetAddAsync(fullKey, serializedValue);
     }
 
     public async Task<List<T>> SetMembersAsync<T>(string key, CancellationToken cancellationToken = default)
@@ -199,7 +199,7 @@ public class RedisCacheService : ICacheService
         {
             if (!value.IsNullOrEmpty)
             {
-                var item = JsonSerializer.Deserialize<T>(value!, _jsonOptions);
+                var item = DeserializeValue<T>(value!);
                 if (item != null)
                 {
                     result.Add(item);
@@ -224,5 +224,81 @@ public class RedisCacheService : ICacheService
         }
         
         return Task.FromResult(result);
+    }
+
+    /// <summary>
+    /// 序列化值
+    /// </summary>
+    private string SerializeValue<T>(T value)
+    {
+        if (value == null)
+        {
+            return string.Empty;
+        }
+
+        // 对于字符串类型，直接返回原值，避免双重序列化
+        if (typeof(T) == typeof(string))
+        {
+            return value.ToString()!;
+        }
+
+        // 对于基本类型，转换为字符串
+        if (IsSimpleType(typeof(T)))
+        {
+            return value.ToString()!;
+        }
+
+        // 对于复杂类型，使用 JSON 序列化
+        return JsonSerializer.Serialize(value, _jsonOptions);
+    }
+
+    /// <summary>
+    /// 反序列化值
+    /// </summary>
+    private T? DeserializeValue<T>(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return default;
+        }
+
+        var targetType = typeof(T);
+
+        // 字符串类型直接返回
+        if (targetType == typeof(string))
+        {
+            return (T)(object)value;
+        }
+
+        // 基本类型转换
+        if (IsSimpleType(targetType))
+        {
+            try
+            {
+                return (T)Convert.ChangeType(value, targetType);
+            }
+            catch
+            {
+                // 如果转换失败，尝试 JSON 反序列化
+                return JsonSerializer.Deserialize<T>(value, _jsonOptions);
+            }
+        }
+
+        // 复杂类型使用 JSON 反序列化
+        return JsonSerializer.Deserialize<T>(value, _jsonOptions);
+    }
+
+    /// <summary>
+    /// 判断是否为简单类型
+    /// </summary>
+    private static bool IsSimpleType(Type type)
+    {
+        return type.IsPrimitive
+            || type.IsEnum
+            || type == typeof(decimal)
+            || type == typeof(DateTime)
+            || type == typeof(DateTimeOffset)
+            || type == typeof(TimeSpan)
+            || type == typeof(Guid);
     }
 }
