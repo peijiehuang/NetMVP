@@ -136,8 +136,8 @@ dotnet run
 
 ### 5. 访问系统
 
-- **后端 API**: http://localhost:5000
-- **Swagger 文档**: http://localhost:5000/swagger
+- **后端 API**: http://localhost:8080
+- **Swagger 文档**: http://localhost:8080/swagger
 - **前端**: 参考若依前端配置
 
 ### 6. 默认账号
