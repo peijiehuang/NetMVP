@@ -1,3 +1,4 @@
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using SkiaSharp;
 
@@ -12,7 +13,6 @@ public class CaptchaService : ICaptchaService
     private const int Width = 120;
     private const int Height = 40;
     private const int CodeLength = 4;
-    private const string CacheKeyPrefix = "captcha:";
     private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(5);
 
     public CaptchaService(ICacheService cacheService)
@@ -28,7 +28,7 @@ public class CaptchaService : ICaptchaService
         var uuid = Guid.NewGuid().ToString();
 
         // 缓存验证码
-        await _cacheService.SetAsync($"{CacheKeyPrefix}{uuid}", code, CacheExpiry, cancellationToken);
+        await _cacheService.SetAsync($"{CacheConstants.CAPTCHA_CODE_KEY}{uuid}", code, CacheExpiry, cancellationToken);
 
         // 生成验证码图片
         var imageBase64 = GenerateCaptchaImage(code);
@@ -42,7 +42,7 @@ public class CaptchaService : ICaptchaService
         if (string.IsNullOrWhiteSpace(uuid) || string.IsNullOrWhiteSpace(code))
             return false;
 
-        var cacheKey = $"{CacheKeyPrefix}{uuid}";
+        var cacheKey = $"{CacheConstants.CAPTCHA_CODE_KEY}{uuid}";
         var cachedCode = await _cacheService.GetAsync<string>(cacheKey, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(cachedCode))

@@ -20,12 +20,20 @@ public class CurrentUserService : ICurrentUserService
     /// </summary>
     public long GetUserId()
     {
-        var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("userId") 
-            ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub");
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext?.User == null)
+        {
+            throw new UnauthorizedAccessException("未找到当前用户上下文");
+        }
+
+        // 优先查找 sub claim（JWT标准）
+        var userIdClaim = httpContext.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)
+            ?? httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
+            ?? httpContext.User.FindFirst("userId");
         
         if (userIdClaim == null || !long.TryParse(userIdClaim.Value, out var userId))
         {
-            return 1; // 默认返回管理员ID（用于后台任务等场景）
+            throw new UnauthorizedAccessException("无法获取当前用户ID");
         }
         
         return userId;
@@ -36,8 +44,16 @@ public class CurrentUserService : ICurrentUserService
     /// </summary>
     public string GetUserName()
     {
-        var userNameClaim = _httpContextAccessor.HttpContext?.User.FindFirst("userName") 
-            ?? _httpContextAccessor.HttpContext?.User.FindFirst("name");
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext?.User == null)
+        {
+            return "system";
+        }
+
+        // 优先查找 unique_name claim（JWT标准）
+        var userNameClaim = httpContext.User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.UniqueName)
+            ?? httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Name)
+            ?? httpContext.User.FindFirst("userName");
         
         return userNameClaim?.Value ?? "system";
     }

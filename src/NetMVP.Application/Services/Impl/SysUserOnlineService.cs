@@ -1,6 +1,7 @@
+using Microsoft.Extensions.Logging;
 using NetMVP.Application.DTOs.UserOnline;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
-using System.Text.Json;
 
 namespace NetMVP.Application.Services.Impl;
 
@@ -11,11 +12,16 @@ public class SysUserOnlineService : ISysUserOnlineService
 {
     private readonly ICacheService _cacheService;
     private readonly IJwtService _jwtService;
+    private readonly ILogger<SysUserOnlineService> _logger;
 
-    public SysUserOnlineService(ICacheService cacheService, IJwtService jwtService)
+    public SysUserOnlineService(
+        ICacheService cacheService, 
+        IJwtService jwtService,
+        ILogger<SysUserOnlineService> logger)
     {
         _cacheService = cacheService;
         _jwtService = jwtService;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -24,7 +30,7 @@ public class SysUserOnlineService : ISysUserOnlineService
         CancellationToken cancellationToken = default)
     {
         // 获取所有在线用户的 Key
-        var keys = await _cacheService.GetKeysAsync("online_user:*", cancellationToken);
+        var keys = await _cacheService.GetKeysAsync($"{CacheConstants.ONLINE_USER_KEY}*", cancellationToken);
         if (keys == null || keys.Count == 0)
             return (new List<OnlineUserDto>(), 0);
 
@@ -32,20 +38,17 @@ public class SysUserOnlineService : ISysUserOnlineService
         var onlineUsers = new List<OnlineUserDto>();
         foreach (var key in keys)
         {
-            var userJson = await _cacheService.GetAsync<string>(key, cancellationToken);
-            if (string.IsNullOrEmpty(userJson)) continue;
-
             try
             {
-                var userInfo = JsonSerializer.Deserialize<OnlineUserDto>(userJson);
+                var userInfo = await _cacheService.GetAsync<OnlineUserDto>(key, cancellationToken);
                 if (userInfo != null)
                 {
                     onlineUsers.Add(userInfo);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // 忽略反序列化失败的数据
+                _logger.LogError(ex, $"获取在线用户信息失败，Key: {key}");
             }
         }
 
@@ -79,13 +82,35 @@ public class SysUserOnlineService : ISysUserOnlineService
     /// <inheritdoc/>
     public async Task ForceLogoutAsync(string tokenId, CancellationToken cancellationToken = default)
     {
-        // 将 Token 加入黑名单
-        var blacklistKey = $"token_blacklist:{tokenId}";
-        await _cacheService.SetAsync(blacklistKey, "revoked", TimeSpan.FromHours(24), cancellationToken);
-
-        // 删除在线用户信息
-        var onlineUserKey = $"online_user:{tokenId}";
-        await _cacheService.RemoveAsync(onlineUserKey, cancellationToken);
+        // tokenId 就是 JTI
+        var onlineUserKey = $"{CacheConstants.ONLINE_USER_KEY}{tokenId}";
+        
+        try
+        {
+            // 先获取用户信息
+            var userInfo = await _cacheService.GetAsync<OnlineUserDto>(onlineUserKey, cancellationToken);
+            
+            if (userInfo != null)
+            {
+                // 删除在线用户信息
+                await _cacheService.RemoveAsync(onlineUserKey, cancellationToken);
+                
+                // 删除用户会话编号（单点登录关键）
+                var userSessionKey = $"{CacheConstants.USER_SESSION_KEY}{userInfo.UserId}";
+                await _cacheService.RemoveAsync(userSessionKey, cancellationToken);
+                
+                _logger.LogInformation($"强退用户：{userInfo.UserName}({userInfo.UserId})，JTI: {tokenId}");
+            }
+            else
+            {
+                _logger.LogWarning($"强退用户失败，未找到在线用户信息，JTI: {tokenId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"强退用户失败，JTI: {tokenId}");
+            throw;
+        }
     }
 
     /// <inheritdoc/>

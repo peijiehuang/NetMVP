@@ -220,7 +220,9 @@ public class RedisCacheService : ICacheService
         {
             var server = _redis.GetServer(endpoint);
             var keys = server.Keys(pattern: fullPattern).ToArray();
-            result.AddRange(keys.Select(k => k.ToString()));
+            // 移除前缀,返回不带前缀的键
+            var prefixLength = _options.KeyPrefix.Length;
+            result.AddRange(keys.Select(k => k.ToString().Substring(prefixLength)));
         }
         
         return Task.FromResult(result);

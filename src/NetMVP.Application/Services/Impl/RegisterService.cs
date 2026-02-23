@@ -43,7 +43,7 @@ public class RegisterService : IRegisterService
         }
 
         // 2. 验证验证码
-        var cacheKey = $"captcha:{dto.Uuid}";
+        var cacheKey = $"{CacheConstants.CAPTCHA_CODE_KEY}{dto.Uuid}";
         var cachedCode = await _cacheService.GetAsync<string>(cacheKey);
         
         if (string.IsNullOrEmpty(cachedCode))

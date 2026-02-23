@@ -1,8 +1,8 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.LoginInfo;
-using NetMVP.Domain.Entities;
 using NetMVP.Domain.Constants;
+using NetMVP.Domain.Entities;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -167,7 +167,7 @@ public class SysLoginInfoService : ISysLoginInfoService
         CancellationToken cancellationToken = default)
     {
         // 清除密码错误次数缓存
-        var cacheKey = $"pwd_err_cnt:{userName}";
+        var cacheKey = $"{CacheConstants.PWD_ERR_CNT_KEY}{userName}";
         await _cacheService.RemoveAsync(cacheKey, cancellationToken);
         return true;
     }

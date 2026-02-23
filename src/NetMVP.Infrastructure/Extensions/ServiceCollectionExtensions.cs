@@ -199,6 +199,27 @@ public static class ServiceCollectionExtensions
                 // 配置认证失败时的处理
                 options.Events = new JwtBearerEvents
                 {
+                    OnTokenValidated = async context =>
+                    {
+                        // 单点登录验证：校验当前会话编号是否有效
+                        var jtiClaim = context.Principal?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti);
+                        var userIdClaim = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                        
+                        if (jtiClaim != null && userIdClaim != null && long.TryParse(userIdClaim.Value, out var userId))
+                        {
+                            var cacheService = context.HttpContext.RequestServices.GetRequiredService<ICacheService>();
+                            
+                            // 获取用户当前有效的会话编号
+                            var userSessionKey = $"{NetMVP.Domain.Constants.CacheConstants.USER_SESSION_KEY}{userId}";
+                            var currentJti = await cacheService.GetAsync<string>(userSessionKey);
+                            
+                            // 如果当前会话编号不存在，或者与Token中的JTI不匹配，说明用户已被强退或被新登录挤下线
+                            if (string.IsNullOrEmpty(currentJti) || currentJti != jtiClaim.Value)
+                            {
+                                context.Fail("用户已被强制下线或登录已过期");
+                            }
+                        }
+                    },
                     OnChallenge = context =>
                     {
                         // 阻止默认的401响应

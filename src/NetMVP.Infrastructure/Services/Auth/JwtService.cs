@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using NetMVP.Infrastructure.Configuration;
+using NetMVP.Infrastructure.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -19,18 +23,24 @@ public class JwtService : IJwtService
     private readonly JwtSecurityTokenHandler _tokenHandler;
     private readonly ISysUserRepository _userRepository;
     private readonly ISysDeptRepository _deptRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<JwtService> _logger;
 
     public JwtService(
         IOptions<JwtSettings> jwtSettings, 
         ICacheService cacheService,
         ISysUserRepository userRepository,
-        ISysDeptRepository deptRepository)
+        ISysDeptRepository deptRepository,
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<JwtService> logger)
     {
         _jwtSettings = jwtSettings.Value;
         _cacheService = cacheService;
         _tokenHandler = new JwtSecurityTokenHandler();
         _userRepository = userRepository;
         _deptRepository = deptRepository;
+        _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -39,6 +49,9 @@ public class JwtService : IJwtService
         string userName, 
         CancellationToken cancellationToken = default)
     {
+        // 单点登录：先删除该用户的旧会话
+        await RemoveUserOldSessionAsync(userId, cancellationToken);
+
         // 生成访问令牌
         var claims = new[]
         {
@@ -65,7 +78,7 @@ public class JwtService : IJwtService
         var refreshToken = GenerateRefreshToken();
 
         // 存储刷新令牌到 Redis
-        var refreshTokenKey = $"refresh_token:{userId}:{refreshToken}";
+        var refreshTokenKey = $"{CacheConstants.REFRESH_TOKEN_KEY}{userId}:{refreshToken}";
         await _cacheService.SetAsync(
             refreshTokenKey, 
             userId.ToString(), 
@@ -103,7 +116,7 @@ public class JwtService : IJwtService
             var jti = GetJtiFromToken(token);
             if (!string.IsNullOrEmpty(jti))
             {
-                var blacklistKey = $"token_blacklist:{jti}";
+                var blacklistKey = $"{CacheConstants.TOKEN_BLACKLIST_KEY}{jti}";
                 var isBlacklisted = await _cacheService.ExistsAsync(blacklistKey, cancellationToken);
                 if (isBlacklisted)
                     return false;
@@ -123,7 +136,7 @@ public class JwtService : IJwtService
         CancellationToken cancellationToken = default)
     {
         // 查找刷新令牌
-        var keys = await _cacheService.GetKeysAsync($"refresh_token:*:{refreshToken}", cancellationToken);
+        var keys = await _cacheService.GetKeysAsync($"{CacheConstants.REFRESH_TOKEN_KEY}*:{refreshToken}", cancellationToken);
         if (keys == null || keys.Count == 0)
             throw new UnauthorizedAccessException("无效的刷新令牌");
 
@@ -150,7 +163,7 @@ public class JwtService : IJwtService
             return;
 
         // 将 Token 加入黑名单
-        var blacklistKey = $"token_blacklist:{jti}";
+        var blacklistKey = $"{CacheConstants.TOKEN_BLACKLIST_KEY}{jti}";
         var expirationTime = GetTokenExpirationTime(token);
         var ttl = expirationTime - DateTime.UtcNow;
         
@@ -244,27 +257,134 @@ public class JwtService : IJwtService
     /// </summary>
     private async Task StoreOnlineUserAsync(long userId, string userName, string jti, CancellationToken cancellationToken)
     {
-        // 构建在线用户信息（简化版本，不查询数据库）
-        var onlineUser = new
+        // 查询用户部门信息
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        string? deptName = null;
+        if (user?.DeptId != null)
         {
-            tokenId = jti,
-            userId = userId,
-            userName = userName,
-            deptName = (string?)null,
-            ipaddr = "127.0.0.1", // 实际应该从 HttpContext 获取
-            loginLocation = "内网IP",
-            browser = "Unknown",
-            os = "Unknown",
-            loginTime = DateTime.Now
+            var dept = await _deptRepository.GetByIdAsync(user.DeptId.Value, cancellationToken);
+            deptName = dept?.DeptName;
+        }
+
+        // 获取真实IP地址
+        var httpContext = _httpContextAccessor.HttpContext;
+        var ipAddress = IpUtils.GetIpAddress(httpContext);
+        var isInternalIp = IpUtils.IsInternalIp(ipAddress);
+        var loginLocation = isInternalIp ? "内网IP" : "外网IP";
+
+        // 获取User-Agent信息
+        var userAgent = httpContext?.Request.Headers["User-Agent"].ToString() ?? "Unknown";
+        var browser = ParseBrowser(userAgent);
+        var os = ParseOperatingSystem(userAgent);
+
+        // 构建在线用户信息
+        var onlineUser = new NetMVP.Application.DTOs.UserOnline.OnlineUserDto
+        {
+            TokenId = jti,
+            UserId = userId,
+            UserName = userName,
+            DeptName = deptName,
+            Ipaddr = ipAddress,
+            LoginLocation = loginLocation,
+            Browser = browser,
+            Os = os,
+            LoginTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
         };
 
-        // 存储到 Redis，过期时间与 Token 一致
-        var onlineUserKey = $"online_user:{jti}";
+        // 存储在线用户信息，使用 JTI 作为 Key
+        var onlineUserKey = $"{CacheConstants.ONLINE_USER_KEY}{jti}";
         await _cacheService.SetAsync(
             onlineUserKey,
             onlineUser,
             TimeSpan.FromMinutes(_jwtSettings.ExpireMinutes),
             cancellationToken);
+
+        // 存储用户当前有效的会话编号（单点登录关键）
+        var userSessionKey = $"{CacheConstants.USER_SESSION_KEY}{userId}";
+        await _cacheService.SetAsync(
+            userSessionKey,
+            jti,
+            TimeSpan.FromMinutes(_jwtSettings.ExpireMinutes),
+            cancellationToken);
+        
+        _logger.LogInformation($"用户 {userName}({userId}) 登录，JTI: {jti}");
+    }
+
+    /// <summary>
+    /// 删除用户的旧会话（单点登录）
+    /// </summary>
+    private async Task RemoveUserOldSessionAsync(long userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // 获取用户当前的会话编号
+            var userSessionKey = $"{CacheConstants.USER_SESSION_KEY}{userId}";
+            var oldJti = await _cacheService.GetAsync<string>(userSessionKey, cancellationToken);
+            
+            if (!string.IsNullOrEmpty(oldJti))
+            {
+                // 删除旧的在线用户信息
+                var oldOnlineUserKey = $"{CacheConstants.ONLINE_USER_KEY}{oldJti}";
+                await _cacheService.RemoveAsync(oldOnlineUserKey, cancellationToken);
+                _logger.LogInformation($"删除用户 {userId} 的旧会话，JTI: {oldJti}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"删除用户 {userId} 的旧会话失败");
+        }
+    }
+
+    /// <summary>
+    /// 解析浏览器类型
+    /// </summary>
+    private static string ParseBrowser(string userAgent)
+    {
+        if (string.IsNullOrEmpty(userAgent))
+            return "Unknown";
+
+        if (userAgent.Contains("Edg/"))
+            return "Edge";
+        if (userAgent.Contains("Chrome/"))
+            return "Chrome";
+        if (userAgent.Contains("Firefox/"))
+            return "Firefox";
+        if (userAgent.Contains("Safari/") && !userAgent.Contains("Chrome"))
+            return "Safari";
+        if (userAgent.Contains("MSIE") || userAgent.Contains("Trident/"))
+            return "IE";
+
+        return "Unknown";
+    }
+
+    /// <summary>
+    /// 解析操作系统
+    /// </summary>
+    private static string ParseOperatingSystem(string userAgent)
+    {
+        if (string.IsNullOrEmpty(userAgent))
+            return "Unknown";
+
+        if (userAgent.Contains("Windows NT 10.0"))
+            return "Windows 10";
+        if (userAgent.Contains("Windows NT 6.3"))
+            return "Windows 8.1";
+        if (userAgent.Contains("Windows NT 6.2"))
+            return "Windows 8";
+        if (userAgent.Contains("Windows NT 6.1"))
+            return "Windows 7";
+        if (userAgent.Contains("Windows"))
+            return "Windows";
+        if (userAgent.Contains("Mac OS X"))
+            return "macOS";
+        if (userAgent.Contains("Linux"))
+            return "Linux";
+        if (userAgent.Contains("Android"))
+            return "Android";
+        if (userAgent.Contains("iPhone") || userAgent.Contains("iPad"))
+            return "iOS";
+
+        return "Unknown";
     }
 
     /// <summary>

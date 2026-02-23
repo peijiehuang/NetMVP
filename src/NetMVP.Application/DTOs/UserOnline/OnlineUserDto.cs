@@ -46,7 +46,7 @@ public class OnlineUserDto
     public string? Os { get; set; }
 
     /// <summary>
-    /// 登录时间
+    /// 登录时间（时间戳，毫秒）
     /// </summary>
-    public DateTime LoginTime { get; set; }
+    public long LoginTime { get; set; }
 }
