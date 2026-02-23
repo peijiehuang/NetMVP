@@ -212,11 +212,11 @@ public class SysPostService : ISysPostService
             .OrderBy(p => p.PostSort)
             .ToListAsync(cancellationToken);
 
-        var postDtos = _mapper.Map<List<PostDto>>(posts);
+        var exportDtos = _mapper.Map<List<ExportPostDto>>(posts);
 
         // 导出到内存流
         using var stream = new MemoryStream();
-        await _excelService.ExportAsync(postDtos, stream, cancellationToken);
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
         return stream.ToArray();
     }
 

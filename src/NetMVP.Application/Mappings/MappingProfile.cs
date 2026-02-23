@@ -61,6 +61,8 @@ public class MappingProfile : Profile
         // 岗位映射
         CreateMap<SysPost, PostDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+        CreateMap<SysPost, ExportPostDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
         // 字典类型映射
         CreateMap<SysDictType, DictTypeDto>()
