@@ -1,5 +1,5 @@
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using NetMVP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +69,7 @@ public class PermissionService : IPermissionService
         if (await IsAdminAsync(userId))
         {
             var allPermissions = await _menuRepository.GetQueryable()
-                .Where(m => !string.IsNullOrEmpty(m.Perms) && m.Status == UserStatus.Normal)
+                .Where(m => !string.IsNullOrEmpty(m.Perms) && m.Status == UserConstants.NORMAL)
                 .Select(m => m.Perms!)
                 .Distinct()
                 .ToListAsync();
@@ -105,7 +105,7 @@ public class PermissionService : IPermissionService
         var permissions = await _menuRepository.GetQueryable()
             .Where(m => menuIds.Contains(m.MenuId) 
                 && !string.IsNullOrEmpty(m.Perms) 
-                && m.Status == UserStatus.Normal)
+                && m.Status == UserConstants.NORMAL)
             .Select(m => m.Perms!)
             .Distinct()
             .ToListAsync();
@@ -142,7 +142,7 @@ public class PermissionService : IPermissionService
         }
 
         var roles = await _roleRepository.GetQueryable()
-            .Where(r => roleIds.Contains(r.RoleId) && r.Status == UserStatus.Normal)
+            .Where(r => roleIds.Contains(r.RoleId) && r.Status == UserConstants.NORMAL)
             .Select(r => r.RoleKey)
             .ToListAsync();
 
@@ -187,11 +187,11 @@ public class PermissionService : IPermissionService
 
         return dataScope switch
         {
-            DataScopeType.All => true,
-            DataScopeType.Custom => await CheckCustomDataScopeAsync(userId, deptId),
-            DataScopeType.Department => await CheckDeptDataScopeAsync(userId, deptId),
-            DataScopeType.DepartmentAndBelow => await CheckDeptAndChildDataScopeAsync(userId, deptId),
-            DataScopeType.Self => await CheckSelfDataScopeAsync(userId, deptId),
+            DataScopeConstants.DATA_SCOPE_ALL => true,
+            DataScopeConstants.DATA_SCOPE_CUSTOM => await CheckCustomDataScopeAsync(userId, deptId),
+            DataScopeConstants.DATA_SCOPE_DEPT => await CheckDeptDataScopeAsync(userId, deptId),
+            DataScopeConstants.DATA_SCOPE_DEPT_AND_CHILD => await CheckDeptAndChildDataScopeAsync(userId, deptId),
+            DataScopeConstants.DATA_SCOPE_SELF => await CheckSelfDataScopeAsync(userId, deptId),
             _ => false
         };
     }
@@ -199,22 +199,22 @@ public class PermissionService : IPermissionService
     /// <summary>
     /// 获取用户的数据权限范围
     /// </summary>
-    public async Task<DataScopeType> GetUserDataScopeAsync(long userId)
+    public async Task<string> GetUserDataScopeAsync(long userId)
     {
         var cacheKey = $"user:datascope:{userId}";
         
         // 尝试从缓存获取
-        var cachedDataScope = await _cacheService.GetAsync<DataScopeType?>(cacheKey);
-        if (cachedDataScope.HasValue)
+        var cachedDataScope = await _cacheService.GetAsync<string>(cacheKey);
+        if (!string.IsNullOrEmpty(cachedDataScope))
         {
-            return cachedDataScope.Value;
+            return cachedDataScope;
         }
 
         // 超级管理员拥有所有数据权限
         if (await IsAdminAsync(userId))
         {
-            await _cacheService.SetAsync(cacheKey, DataScopeType.All, TimeSpan.FromHours(1));
-            return DataScopeType.All;
+            await _cacheService.SetAsync(cacheKey, DataScopeConstants.DATA_SCOPE_ALL, TimeSpan.FromHours(1));
+            return DataScopeConstants.DATA_SCOPE_ALL;
         }
 
         // 获取用户角色的数据权限范围（取最大权限）
@@ -225,14 +225,19 @@ public class PermissionService : IPermissionService
 
         if (!roleIds.Any())
         {
-            return DataScopeType.Self;
+            return DataScopeConstants.DATA_SCOPE_SELF;
         }
 
         var dataScope = await _roleRepository.GetQueryable()
-            .Where(r => roleIds.Contains(r.RoleId) && r.Status == UserStatus.Normal)
+            .Where(r => roleIds.Contains(r.RoleId) && r.Status == UserConstants.NORMAL)
             .Select(r => r.DataScope)
             .OrderBy(ds => ds)
             .FirstOrDefaultAsync();
+
+        if (string.IsNullOrEmpty(dataScope))
+        {
+            dataScope = DataScopeConstants.DATA_SCOPE_SELF;
+        }
 
         // 缓存数据权限范围
         await _cacheService.SetAsync(cacheKey, dataScope, TimeSpan.FromHours(1));

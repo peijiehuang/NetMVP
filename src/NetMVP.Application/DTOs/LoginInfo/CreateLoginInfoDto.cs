@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.DTOs.LoginInfo;
 
@@ -35,7 +35,7 @@ public class CreateLoginInfoDto
     /// <summary>
     /// 登录状态
     /// </summary>
-    public CommonStatus Status { get; set; } = CommonStatus.Success;
+    public string Status { get; set; } = CommonConstants.SUCCESS;
 
     /// <summary>
     /// 提示消息

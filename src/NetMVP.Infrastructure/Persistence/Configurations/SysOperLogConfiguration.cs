@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -19,10 +18,10 @@ public class SysOperLogConfiguration : IEntityTypeConfiguration<SysOperLog>
         builder.Property(e => e.OperId).HasColumnName("oper_id");
 
         builder.Property(e => e.Title).HasColumnName("title").HasMaxLength(50);
-        builder.Property(e => e.BusinessType).HasColumnName("business_type").HasConversion(EnumConverters.BusinessTypeConverter);
+        builder.Property(e => e.BusinessType).HasColumnName("business_type").HasMaxLength(1).HasDefaultValue(OperLogConstants.BUSINESS_TYPE_OTHER);
         builder.Property(e => e.Method).HasColumnName("method").HasMaxLength(100);
         builder.Property(e => e.RequestMethod).HasColumnName("request_method").HasMaxLength(10);
-        builder.Property(e => e.OperatorType).HasColumnName("operator_type").HasConversion(EnumConverters.OperatorTypeConverter);
+        builder.Property(e => e.OperatorType).HasColumnName("operator_type").HasMaxLength(1).HasDefaultValue(OperLogConstants.OPERATOR_TYPE_OTHER);
         builder.Property(e => e.OperName).HasColumnName("oper_name").HasMaxLength(50);
         builder.Property(e => e.DeptName).HasColumnName("dept_name").HasMaxLength(50);
         builder.Property(e => e.OperUrl).HasColumnName("oper_url").HasMaxLength(255);
@@ -30,7 +29,7 @@ public class SysOperLogConfiguration : IEntityTypeConfiguration<SysOperLog>
         builder.Property(e => e.OperLocation).HasColumnName("oper_location").HasMaxLength(255);
         builder.Property(e => e.OperParam).HasColumnName("oper_param").HasMaxLength(2000);
         builder.Property(e => e.JsonResult).HasColumnName("json_result").HasMaxLength(2000);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.CommonStatusConverter);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(CommonConstants.SUCCESS);
         builder.Property(e => e.ErrorMsg).HasColumnName("error_msg").HasMaxLength(2000);
         builder.Property(e => e.OperTime).HasColumnName("oper_time");
         builder.Property(e => e.CostTime).HasColumnName("cost_time");

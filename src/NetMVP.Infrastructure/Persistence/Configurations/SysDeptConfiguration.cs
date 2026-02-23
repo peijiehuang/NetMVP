@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -25,8 +24,8 @@ public class SysDeptConfiguration : IEntityTypeConfiguration<SysDept>
         builder.Property(e => e.Leader).HasColumnName("leader").HasMaxLength(20);
         builder.Property(e => e.PhoneValue).HasColumnName("phone").HasMaxLength(11);
         builder.Property(e => e.EmailValue).HasColumnName("email").HasMaxLength(50);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter).HasDefaultValue(UserStatus.Normal);
-        builder.Property(e => e.DelFlag).HasColumnName("del_flag").HasConversion(EnumConverters.DelFlagConverter).HasDefaultValue(DelFlag.Exist);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(UserConstants.NORMAL);
+        builder.Property(e => e.DelFlag).HasColumnName("del_flag").HasMaxLength(1).HasDefaultValue(UserConstants.DEL_FLAG_EXIST);
 
         // BaseEntity 字段
         builder.Property(e => e.CreateBy).HasColumnName("create_by").HasMaxLength(64);

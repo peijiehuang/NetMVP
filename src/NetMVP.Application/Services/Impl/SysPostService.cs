@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Post;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -54,8 +54,7 @@ public class SysPostService : ISysPostService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(p => p.Status == status);
+            queryable = queryable.Where(p => p.Status == query.Status);
         }
 
         // 总数
@@ -206,8 +205,7 @@ public class SysPostService : ISysPostService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(p => p.Status == status);
+            queryable = queryable.Where(p => p.Status == query.Status);
         }
 
         var posts = await queryable
@@ -258,7 +256,7 @@ public class SysPostService : ISysPostService
     public async Task<List<PostDto>> GetAllPostsAsync(CancellationToken cancellationToken = default)
     {
         var posts = await _postRepository.GetQueryable()
-            .Where(p => p.Status == UserStatus.Normal)
+            .Where(p => p.Status == UserConstants.NORMAL)
             .OrderBy(p => p.PostSort)
             .ToListAsync(cancellationToken);
 

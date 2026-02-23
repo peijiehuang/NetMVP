@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetMVP.Application.DTOs.Auth;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Exceptions;
 using NetMVP.Domain.Interfaces;
 
@@ -72,8 +72,8 @@ public class RegisterService : IRegisterService
             UserName = dto.UserName,
             NickName = dto.UserName, // 默认昵称与用户名相同
             UserType = "00",
-            Status = UserStatus.Normal,
-            DelFlag = DelFlag.Exist,
+            Status = UserConstants.NORMAL,
+            DelFlag = UserConstants.DEL_FLAG_EXIST,
             CreateBy = dto.UserName,
             CreateTime = DateTime.Now
         };

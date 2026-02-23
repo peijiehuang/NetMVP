@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Entities;
 
@@ -44,12 +44,12 @@ public class SysDictData : BaseEntity
     public string? ListClass { get; set; }
 
     /// <summary>
-    /// 是否默认
+    /// 是否默认（Y是 N否）
     /// </summary>
-    public YesNo IsDefault { get; set; } = YesNo.No;
+    public string IsDefault { get; set; } = CommonConstants.NO;
 
     /// <summary>
-    /// 状态
+    /// 状态（0正常 1停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 }

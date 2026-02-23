@@ -1,5 +1,5 @@
 using NetMVP.Application.Common.Models;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.DTOs.LoginInfo;
 
@@ -21,7 +21,7 @@ public class LoginInfoQueryDto : PageQueryDto
     /// <summary>
     /// 登录状态
     /// </summary>
-    public CommonStatus? Status { get; set; }
+    public string? Status { get; set; }
 
     /// <summary>
     /// 开始时间

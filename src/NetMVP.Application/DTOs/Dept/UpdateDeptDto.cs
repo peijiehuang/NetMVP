@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Dept;
@@ -53,5 +53,5 @@ public class UpdateDeptDto
     /// <summary>
     /// 部门状态
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 }

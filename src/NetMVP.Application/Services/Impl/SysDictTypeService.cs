@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Dict;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -58,8 +58,7 @@ public class SysDictTypeService : ISysDictTypeService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(d => d.Status == status);
+            queryable = queryable.Where(d => d.Status == query.Status);
         }
 
         // 总数
@@ -210,8 +209,7 @@ public class SysDictTypeService : ISysDictTypeService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(d => d.Status == status);
+            queryable = queryable.Where(d => d.Status == query.Status);
         }
 
         var dictTypes = await queryable
@@ -247,7 +245,7 @@ public class SysDictTypeService : ISysDictTypeService
     public async Task<List<DictTypeDto>> GetAllDictTypesAsync(CancellationToken cancellationToken = default)
     {
         var dictTypes = await _dictTypeRepository.GetQueryable()
-            .Where(d => d.Status == UserStatus.Normal)
+            .Where(d => d.Status == UserConstants.NORMAL)
             .OrderBy(d => d.DictId)
             .ToListAsync(cancellationToken);
 

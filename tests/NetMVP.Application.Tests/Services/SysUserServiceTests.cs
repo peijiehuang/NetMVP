@@ -5,7 +5,7 @@ using NetMVP.Application.DTOs.User;
 using NetMVP.Application.Mappings;
 using NetMVP.Application.Services.Impl;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using Xunit;
 

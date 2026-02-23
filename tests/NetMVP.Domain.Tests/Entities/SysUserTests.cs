@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Tests.Entities;
 
@@ -157,9 +157,9 @@ public class SysUserTests
         var user = new SysUser();
 
         // Assert
-        user.Gender.Should().Be(Gender.Unknown);
-        user.Status.Should().Be(UserStatus.Normal);
-        user.DelFlag.Should().Be(DelFlag.Exist);
+        user.Sex.Should().Be(UserConstants.SEX_UNKNOWN);
+        user.Status.Should().Be(UserConstants.NORMAL);
+        user.DelFlag.Should().Be(UserConstants.DEL_FLAG_EXIST);
         user.UserType.Should().Be("00");
         user.UserRoles.Should().NotBeNull().And.BeEmpty();
         user.UserPosts.Should().NotBeNull().And.BeEmpty();

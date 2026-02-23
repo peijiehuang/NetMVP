@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -20,7 +19,7 @@ public class SysDictTypeConfiguration : IEntityTypeConfiguration<SysDictType>
 
         builder.Property(e => e.DictName).HasColumnName("dict_name").HasMaxLength(100).IsRequired();
         builder.Property(e => e.DictType).HasColumnName("dict_type").HasMaxLength(100).IsRequired();
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter).HasDefaultValue(UserStatus.Normal);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(UserConstants.NORMAL);
 
         // BaseEntity 字段
         builder.Property(e => e.CreateBy).HasColumnName("create_by").HasMaxLength(64);

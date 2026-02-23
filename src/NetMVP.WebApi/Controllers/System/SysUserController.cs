@@ -6,7 +6,7 @@ using NetMVP.Application.DTOs.Post;
 using NetMVP.Application.DTOs.Role;
 using NetMVP.Application.DTOs.User;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -114,7 +114,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:user:add")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Insert)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateUserDto dto)
     {
         try
@@ -133,7 +133,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:user:edit")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateUserDto dto)
     {
         try
@@ -152,7 +152,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpDelete("{userIds}")]
     [RequirePermission("system:user:remove")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Delete)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string userIds)
     {
         try
@@ -172,7 +172,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPut("resetPwd")]
     [RequirePermission("system:user:resetPwd")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> ResetPassword([FromBody] ResetPasswordDto dto)
     {
         try
@@ -191,7 +191,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPut("changeStatus")]
     [RequirePermission("system:user:edit")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> ChangeStatus([FromBody] UpdateUserStatusDto dto)
     {
         try
@@ -210,7 +210,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPost("export")]
     [RequirePermission("system:user:export")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Export)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] UserQueryDto query)
     {
         var data = await _userService.ExportUsersAsync(query);
@@ -286,7 +286,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPut("authRole")]
     [RequirePermission("system:user:edit")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Grant)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_GRANT)]
     public async Task<AjaxResult> UpdateAuthRole([FromQuery] long userId, [FromQuery] string? roleIds)
     {
         try
@@ -318,7 +318,7 @@ public class SysUserController : BaseController
     /// </summary>
     [HttpPost("importData")]
     [RequirePermission("system:user:import")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Import)]
+    [Log(Title = "用户管理", BusinessType = OperLogConstants.BUSINESS_TYPE_IMPORT)]
     public async Task<AjaxResult> ImportData(IFormFile file, [FromQuery] string updateSupport = "0")
     {
         try

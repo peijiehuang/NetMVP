@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.ValueObjects;
 
 namespace NetMVP.Domain.Entities;
@@ -39,9 +39,9 @@ public class SysLoginInfo
     public string? Os { get; set; }
 
     /// <summary>
-    /// 登录状态
+    /// 登录状态（0成功 1失败）
     /// </summary>
-    public CommonStatus Status { get; set; } = CommonStatus.Success;
+    public string Status { get; set; } = CommonConstants.SUCCESS;
 
     /// <summary>
     /// 提示消息

@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Entities;
 
@@ -59,19 +59,19 @@ public class SysMenu : BaseEntity
     public bool IsCache { get; set; }
 
     /// <summary>
-    /// 菜单类型
+    /// 菜单类型（M目录 C菜单 F按钮）
     /// </summary>
-    public MenuType MenuType { get; set; } = MenuType.Menu;
+    public string MenuType { get; set; } = UserConstants.TYPE_MENU;
 
     /// <summary>
-    /// 显示状态
+    /// 显示状态（0显示 1隐藏）
     /// </summary>
-    public VisibleStatus Visible { get; set; } = VisibleStatus.Show;
+    public string Visible { get; set; } = CommonConstants.VISIBLE_SHOW;
 
     /// <summary>
-    /// 状态
+    /// 状态（0正常 1停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
     /// 权限标识

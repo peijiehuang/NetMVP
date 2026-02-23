@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Infrastructure.Persistence;
 using NetMVP.Infrastructure.Repositories;
 
@@ -33,7 +33,7 @@ public class RepositoryTests : IDisposable
         {
             UserName = "testuser",
             NickName = "测试用户",
-            Status = UserStatus.Normal
+            Status = UserConstants.NORMAL
         };
 
         // Act
@@ -52,9 +52,9 @@ public class RepositoryTests : IDisposable
         // Arrange
         var users = new List<SysUser>
         {
-            new SysUser { UserName = "user1", NickName = "用户1", Status = UserStatus.Normal },
-            new SysUser { UserName = "user2", NickName = "用户2", Status = UserStatus.Normal },
-            new SysUser { UserName = "user3", NickName = "用户3", Status = UserStatus.Normal }
+            new SysUser { UserName = "user1", NickName = "用户1", Status = UserConstants.NORMAL },
+            new SysUser { UserName = "user2", NickName = "用户2", Status = UserConstants.NORMAL },
+            new SysUser { UserName = "user3", NickName = "用户3", Status = UserConstants.NORMAL }
         };
 
         foreach (var user in users)
@@ -76,9 +76,9 @@ public class RepositoryTests : IDisposable
         // Arrange
         var users = new List<SysUser>
         {
-            new SysUser { UserName = "admin", NickName = "管理员", Status = UserStatus.Normal },
-            new SysUser { UserName = "user1", NickName = "用户1", Status = UserStatus.Disabled },
-            new SysUser { UserName = "user2", NickName = "用户2", Status = UserStatus.Normal }
+            new SysUser { UserName = "admin", NickName = "管理员", Status = UserConstants.NORMAL },
+            new SysUser { UserName = "user1", NickName = "用户1", Status = UserConstants.USER_DISABLE },
+            new SysUser { UserName = "user2", NickName = "用户2", Status = UserConstants.NORMAL }
         };
 
         foreach (var user in users)
@@ -88,7 +88,7 @@ public class RepositoryTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repository.FindAsync(u => u.Status == UserStatus.Normal);
+        var result = await _repository.FindAsync(u => u.Status == UserConstants.NORMAL);
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -102,7 +102,7 @@ public class RepositoryTests : IDisposable
         {
             UserName = "testuser",
             NickName = "测试用户",
-            Status = UserStatus.Normal
+            Status = UserConstants.NORMAL
         };
 
         await _repository.AddAsync(user);
@@ -127,7 +127,7 @@ public class RepositoryTests : IDisposable
         {
             UserName = "testuser",
             NickName = "测试用户",
-            Status = UserStatus.Normal
+            Status = UserConstants.NORMAL
         };
 
         await _repository.AddAsync(user);

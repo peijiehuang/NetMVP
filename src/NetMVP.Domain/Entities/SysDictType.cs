@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Entities;
 
@@ -24,7 +24,7 @@ public class SysDictType : BaseEntity
     public string DictType { get; set; } = string.Empty;
 
     /// <summary>
-    /// 状态
+    /// 状态（0正常 1停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 }

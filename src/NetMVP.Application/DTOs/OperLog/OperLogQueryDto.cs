@@ -1,5 +1,5 @@
 using NetMVP.Application.Common.Models;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.DTOs.OperLog;
 
@@ -16,7 +16,7 @@ public class OperLogQueryDto : PageQueryDto
     /// <summary>
     /// 业务类型
     /// </summary>
-    public BusinessType? BusinessType { get; set; }
+    public string? BusinessType { get; set; }
 
     /// <summary>
     /// 操作人员
@@ -26,7 +26,7 @@ public class OperLogQueryDto : PageQueryDto
     /// <summary>
     /// 操作状态
     /// </summary>
-    public CommonStatus? Status { get; set; }
+    public string? Status { get; set; }
 
     /// <summary>
     /// 开始时间

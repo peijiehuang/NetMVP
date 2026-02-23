@@ -38,9 +38,9 @@ public class SysOperLogService : ISysOperLogService
             queryable = queryable.Where(x => x.Title != null && x.Title.Contains(query.Title));
         }
 
-        if (query.BusinessType.HasValue)
+        if (!string.IsNullOrWhiteSpace(query.BusinessType))
         {
-            queryable = queryable.Where(x => x.BusinessType == query.BusinessType.Value);
+            queryable = queryable.Where(x => x.BusinessType == query.BusinessType);
         }
 
         if (!string.IsNullOrWhiteSpace(query.OperName))
@@ -48,9 +48,9 @@ public class SysOperLogService : ISysOperLogService
             queryable = queryable.Where(x => x.OperName != null && x.OperName.Contains(query.OperName));
         }
 
-        if (query.Status.HasValue)
+        if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            queryable = queryable.Where(x => x.Status == query.Status.Value);
+            queryable = queryable.Where(x => x.Status == query.Status);
         }
 
         if (query.BeginTime.HasValue)
@@ -150,9 +150,9 @@ public class SysOperLogService : ISysOperLogService
             queryable = queryable.Where(x => x.Title != null && x.Title.Contains(query.Title));
         }
 
-        if (query.BusinessType.HasValue)
+        if (!string.IsNullOrWhiteSpace(query.BusinessType))
         {
-            queryable = queryable.Where(x => x.BusinessType == query.BusinessType.Value);
+            queryable = queryable.Where(x => x.BusinessType == query.BusinessType);
         }
 
         if (!string.IsNullOrWhiteSpace(query.OperName))
@@ -160,9 +160,9 @@ public class SysOperLogService : ISysOperLogService
             queryable = queryable.Where(x => x.OperName != null && x.OperName.Contains(query.OperName));
         }
 
-        if (query.Status.HasValue)
+        if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            queryable = queryable.Where(x => x.Status == query.Status.Value);
+            queryable = queryable.Where(x => x.Status == query.Status);
         }
 
         if (query.BeginTime.HasValue)

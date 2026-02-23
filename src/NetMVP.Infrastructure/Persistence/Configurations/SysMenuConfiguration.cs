@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -27,9 +26,9 @@ public class SysMenuConfiguration : IEntityTypeConfiguration<SysMenu>
         builder.Property(e => e.RouteName).HasColumnName("route_name").HasMaxLength(50);
         builder.Property(e => e.IsFrame).HasColumnName("is_frame");
         builder.Property(e => e.IsCache).HasColumnName("is_cache");
-        builder.Property(e => e.MenuType).HasColumnName("menu_type").HasConversion(EnumConverters.MenuTypeConverter);
-        builder.Property(e => e.Visible).HasColumnName("visible").HasConversion(EnumConverters.VisibleStatusConverter).HasDefaultValue(VisibleStatus.Show);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter).HasDefaultValue(UserStatus.Normal);
+        builder.Property(e => e.MenuType).HasColumnName("menu_type").HasMaxLength(1).HasDefaultValue(UserConstants.TYPE_MENU);
+        builder.Property(e => e.Visible).HasColumnName("visible").HasMaxLength(1).HasDefaultValue(CommonConstants.VISIBLE_SHOW);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(UserConstants.NORMAL);
         builder.Property(e => e.Perms).HasColumnName("perms").HasMaxLength(100);
         builder.Property(e => e.Icon).HasColumnName("icon").HasMaxLength(100);
 

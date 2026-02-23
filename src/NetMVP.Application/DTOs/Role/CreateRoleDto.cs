@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Role;
@@ -30,7 +30,7 @@ public class CreateRoleDto
     /// <summary>
     /// 数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限 5：仅本人数据权限）
     /// </summary>
-    public DataScopeType DataScope { get; set; } = DataScopeType.Department;
+    public string DataScope { get; set; } = DataScopeConstants.DATA_SCOPE_DEPT;
 
     /// <summary>
     /// 菜单树选择项是否关联显示
@@ -45,7 +45,7 @@ public class CreateRoleDto
     /// <summary>
     /// 角色状态（Normal正常 Disabled停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
     /// 菜单ID列表

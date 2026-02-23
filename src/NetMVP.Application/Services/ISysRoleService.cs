@@ -1,5 +1,5 @@
 using NetMVP.Application.DTOs.Role;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.Services;
 
@@ -41,7 +41,7 @@ public interface ISysRoleService
     /// <summary>
     /// 修改角色状态
     /// </summary>
-    Task UpdateRoleStatusAsync(long roleId, UserStatus status, CancellationToken cancellationToken = default);
+    Task UpdateRoleStatusAsync(long roleId, string status, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 检查角色名称唯一性

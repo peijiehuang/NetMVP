@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.ValueObjects;
 
 namespace NetMVP.Domain.Entities;
@@ -45,9 +45,9 @@ public class SysUser : BaseEntity
     public string? PhoneNumberValue { get; set; }
 
     /// <summary>
-    /// 性别
+    /// 性别（0男 1女 2未知）
     /// </summary>
-    public Gender Gender { get; set; } = Gender.Unknown;
+    public string Sex { get; set; } = UserConstants.SEX_UNKNOWN;
 
     /// <summary>
     /// 头像
@@ -60,14 +60,14 @@ public class SysUser : BaseEntity
     public string Password { get; set; } = string.Empty;
 
     /// <summary>
-    /// 状态
+    /// 状态（0正常 1停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
-    /// 删除标志
+    /// 删除标志（0存在 2删除）
     /// </summary>
-    public DelFlag DelFlag { get; set; } = DelFlag.Exist;
+    public string DelFlag { get; set; } = UserConstants.DEL_FLAG_EXIST;
 
     /// <summary>
     /// 最后登录IP

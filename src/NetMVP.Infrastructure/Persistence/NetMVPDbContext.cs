@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Domain.Common;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
 
 namespace NetMVP.Infrastructure.Persistence;
@@ -73,8 +74,8 @@ public class NetMVPDbContext : DbContext
     /// </summary>
     private void ConfigureSoftDeleteFilter(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SysUser>().HasQueryFilter(e => e.DelFlag == Domain.Enums.DelFlag.Exist);
-        modelBuilder.Entity<SysRole>().HasQueryFilter(e => e.DelFlag == Domain.Enums.DelFlag.Exist);
-        modelBuilder.Entity<SysDept>().HasQueryFilter(e => e.DelFlag == Domain.Enums.DelFlag.Exist);
+        modelBuilder.Entity<SysUser>().HasQueryFilter(e => e.DelFlag == UserConstants.DEL_FLAG_EXIST);
+        modelBuilder.Entity<SysRole>().HasQueryFilter(e => e.DelFlag == UserConstants.DEL_FLAG_EXIST);
+        modelBuilder.Entity<SysDept>().HasQueryFilter(e => e.DelFlag == UserConstants.DEL_FLAG_EXIST);
     }
 }

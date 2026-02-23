@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Role;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -62,7 +62,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:role:add")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Insert)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateRoleDto dto)
     {
         try
@@ -81,7 +81,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:role:edit")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateRoleDto dto)
     {
         try
@@ -100,7 +100,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpDelete("{roleIds}")]
     [RequirePermission("system:role:remove")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Delete)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string roleIds)
     {
         try
@@ -120,7 +120,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPut("changeStatus")]
     [RequirePermission("system:role:edit")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> ChangeStatus([FromBody] ChangeStatusDto dto)
     {
         try
@@ -183,7 +183,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPut("dataScope")]
     [RequirePermission("system:role:edit")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> DataScope([FromBody] DataScopeDto dto)
     {
         try
@@ -226,7 +226,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPut("authUser/cancel")]
     [RequirePermission("system:role:edit")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Grant)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_GRANT)]
     public async Task<AjaxResult> CancelAuthUser([FromBody] UserRoleDto dto)
     {
         try
@@ -245,7 +245,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPut("authUser/cancelAll")]
     [RequirePermission("system:role:edit")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Grant)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_GRANT)]
     public async Task<AjaxResult> CancelAuthUserAll([FromQuery] long roleId, [FromQuery] long[] userIds)
     {
         try
@@ -264,7 +264,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPut("authUser/selectAll")]
     [RequirePermission("system:role:edit")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Grant)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_GRANT)]
     public async Task<AjaxResult> SelectAuthUserAll([FromQuery] long roleId, [FromQuery] long[] userIds)
     {
         try
@@ -283,7 +283,7 @@ public class SysRoleController : BaseController
     /// </summary>
     [HttpPost("export")]
     [RequirePermission("system:role:export")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Export)]
+    [Log(Title = "角色管理", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] RoleQueryDto query)
     {
         var data = await _roleService.ExportRolesAsync(query);
@@ -297,7 +297,7 @@ public class SysRoleController : BaseController
 public class ChangeStatusDto
 {
     public long RoleId { get; set; }
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 }
 
 /// <summary>

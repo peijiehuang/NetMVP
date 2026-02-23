@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Role;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -60,8 +60,7 @@ public class SysRoleService : ISysRoleService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(r => r.Status == status);
+            queryable = queryable.Where(r => r.Status == query.Status);
         }
 
         // 时间范围
@@ -142,7 +141,7 @@ public class SysRoleService : ISysRoleService
             MenuCheckStrictly = dto.MenuCheckStrictly,
             DeptCheckStrictly = dto.DeptCheckStrictly,
             Status = dto.Status,
-            DelFlag = DelFlag.Exist,  // 显式设置删除标志
+            DelFlag = UserConstants.DEL_FLAG_EXIST,  // 显式设置删除标志
             Remark = dto.Remark
         };
 
@@ -261,7 +260,7 @@ public class SysRoleService : ISysRoleService
     /// <summary>
     /// 修改角色状态
     /// </summary>
-    public async Task UpdateRoleStatusAsync(long roleId, UserStatus status, CancellationToken cancellationToken = default)
+    public async Task UpdateRoleStatusAsync(long roleId, string status, CancellationToken cancellationToken = default)
     {
         var role = await _roleRepository.GetByIdAsync(roleId, cancellationToken);
         if (role == null)
@@ -452,12 +451,12 @@ public class SysRoleService : ISysRoleService
         // 将字符串转换为 DataScopeType 枚举
         role.DataScope = dataScope switch
         {
-            "1" => DataScopeType.All,
-            "2" => DataScopeType.Custom,
-            "3" => DataScopeType.Department,
-            "4" => DataScopeType.DepartmentAndBelow,
-            "5" => DataScopeType.Self,
-            _ => DataScopeType.All
+            "1" => DataScopeConstants.DATA_SCOPE_ALL,
+            "2" => DataScopeConstants.DATA_SCOPE_CUSTOM,
+            "3" => DataScopeConstants.DATA_SCOPE_DEPT,
+            "4" => DataScopeConstants.DATA_SCOPE_DEPT_AND_CHILD,
+            "5" => DataScopeConstants.DATA_SCOPE_SELF,
+            _ => DataScopeConstants.DATA_SCOPE_ALL
         };
         await _roleRepository.UpdateAsync(role, cancellationToken);
 
@@ -564,7 +563,7 @@ public class SysRoleService : ISysRoleService
     public async Task<List<RoleDto>> GetAllRolesAsync(CancellationToken cancellationToken = default)
     {
         var roles = await _roleRepository.GetQueryable()
-            .Where(r => r.Status == UserStatus.Normal)
+            .Where(r => r.Status == UserConstants.NORMAL)
             .OrderBy(r => r.RoleSort)
             .ToListAsync(cancellationToken);
 
@@ -594,8 +593,7 @@ public class SysRoleService : ISysRoleService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-                queryable = queryable.Where(r => r.Status == status);
+            queryable = queryable.Where(r => r.Status == query.Status);
         }
 
         var roles = await queryable

@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.LoginInfo;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -51,9 +51,9 @@ public class SysLoginInfoService : ISysLoginInfoService
         }
 
         // 登录状态
-        if (query.Status.HasValue)
+        if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            queryable = queryable.Where(x => x.Status == query.Status.Value);
+            queryable = queryable.Where(x => x.Status == query.Status);
         }
 
         // 时间范围
@@ -185,9 +185,9 @@ public class SysLoginInfoService : ISysLoginInfoService
         {
             queryable = queryable.Where(x => x.IpAddrValue.Contains(query.IpAddr));
         }
-        if (query.Status.HasValue)
+        if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            queryable = queryable.Where(x => x.Status == query.Status.Value);
+            queryable = queryable.Where(x => x.Status == query.Status);
         }
         if (query.BeginTime.HasValue)
         {
@@ -210,7 +210,7 @@ public class SysLoginInfoService : ISysLoginInfoService
             登录地点 = x.LoginLocation,
             浏览器 = x.Browser,
             操作系统 = x.Os,
-            登录状态 = x.Status == CommonStatus.Success ? "成功" : "失败",
+            登录状态 = x.Status == CommonConstants.SUCCESS ? "成功" : "失败",
             操作信息 = x.Msg,
             登录日期 = x.LoginTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""
         }).ToList();

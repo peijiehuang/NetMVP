@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Entities;
 
@@ -29,9 +29,9 @@ public class SysRole : BaseEntity
     public int RoleSort { get; set; }
 
     /// <summary>
-    /// 数据范围
+    /// 数据范围（1全部 2自定义 3本部门 4本部门及以下 5仅本人）
     /// </summary>
-    public DataScopeType DataScope { get; set; } = DataScopeType.All;
+    public string DataScope { get; set; } = DataScopeConstants.DATA_SCOPE_ALL;
 
     /// <summary>
     /// 菜单树选择项是否关联显示
@@ -44,14 +44,14 @@ public class SysRole : BaseEntity
     public bool DeptCheckStrictly { get; set; } = true;
 
     /// <summary>
-    /// 状态
+    /// 状态（0正常 1停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
-    /// 删除标志
+    /// 删除标志（0存在 2删除）
     /// </summary>
-    public DelFlag DelFlag { get; set; } = DelFlag.Exist;
+    public string DelFlag { get; set; } = UserConstants.DEL_FLAG_EXIST;
 
     /// <summary>
     /// 角色菜单关联

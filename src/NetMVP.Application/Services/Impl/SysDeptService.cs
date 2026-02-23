@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Dept;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -54,8 +54,7 @@ public class SysDeptService : ISysDeptService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(d => d.Status == status);
+            queryable = queryable.Where(d => d.Status == query.Status);
         }
 
         var depts = await queryable
@@ -96,7 +95,7 @@ public class SysDeptService : ISysDeptService
                 throw new InvalidOperationException("父部门不存在");
             }
 
-            if (parentDept.Status == UserStatus.Disabled)
+            if (parentDept.Status == UserConstants.USER_DISABLE)
             {
                 throw new InvalidOperationException("父部门已停用，不允许新增");
             }
@@ -171,7 +170,7 @@ public class SysDeptService : ISysDeptService
                 throw new InvalidOperationException("父部门不存在");
             }
 
-            if (parentDept.Status == UserStatus.Disabled)
+            if (parentDept.Status == UserConstants.USER_DISABLE)
             {
                 throw new InvalidOperationException("父部门已停用，不允许修改");
             }
@@ -238,7 +237,7 @@ public class SysDeptService : ISysDeptService
     public async Task<List<DeptTreeDto>> GetDeptTreeSelectAsync(CancellationToken cancellationToken = default)
     {
         var depts = await _deptRepository.GetQueryable()
-            .Where(d => d.Status == UserStatus.Normal)
+            .Where(d => d.Status == UserConstants.NORMAL)
             .OrderBy(d => d.ParentId)
             .ThenBy(d => d.OrderNum)
             .ToListAsync(cancellationToken);
@@ -253,7 +252,7 @@ public class SysDeptService : ISysDeptService
     public async Task<List<DeptTreeDto>> GetRoleDeptTreeSelectAsync(long roleId, CancellationToken cancellationToken = default)
     {
         var depts = await _deptRepository.GetQueryable()
-            .Where(d => d.Status == UserStatus.Normal)
+            .Where(d => d.Status == UserConstants.NORMAL)
             .OrderBy(d => d.ParentId)
             .ThenBy(d => d.OrderNum)
             .ToListAsync(cancellationToken);

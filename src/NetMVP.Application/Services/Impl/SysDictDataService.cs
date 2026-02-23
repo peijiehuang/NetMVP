@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Dict;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -55,8 +55,7 @@ public class SysDictDataService : ISysDictDataService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(d => d.Status == status);
+            queryable = queryable.Where(d => d.Status == query.Status);
         }
 
         // 总数
@@ -90,7 +89,7 @@ public class SysDictDataService : ISysDictDataService
 
         // 从数据库获取
         var dictData = await _dictDataRepository.GetQueryable()
-            .Where(d => d.DictType == dictType && d.Status == UserStatus.Normal)
+            .Where(d => d.DictType == dictType && d.Status == UserConstants.NORMAL)
             .OrderBy(d => d.DictSort)
             .ThenBy(d => d.DictCode)
             .ToListAsync(cancellationToken);
@@ -219,8 +218,7 @@ public class SysDictDataService : ISysDictDataService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(d => d.Status == status);
+            queryable = queryable.Where(d => d.Status == query.Status);
         }
 
         var dictData = await queryable

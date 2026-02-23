@@ -5,7 +5,7 @@ using NetMVP.Application.DTOs.Notice;
 using NetMVP.Application.Mappings;
 using NetMVP.Application.Services.Impl;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using Xunit;
 
@@ -60,8 +60,8 @@ public class SysNoticeServiceTests
         {
             NoticeId = noticeId,
             NoticeTitle = "测试公告",
-            NoticeType = NoticeType.Notice,
-            Status = NoticeStatus.Normal
+            NoticeType = NoticeConstants.NOTICE_TYPE_NOTICE,
+            Status = NoticeConstants.NOTICE_STATUS_NORMAL
         };
 
         _noticeRepositoryMock.Setup(x => x.GetByIdAsync(noticeId, It.IsAny<CancellationToken>()))

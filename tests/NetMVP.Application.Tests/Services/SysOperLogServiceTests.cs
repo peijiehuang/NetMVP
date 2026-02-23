@@ -5,7 +5,7 @@ using NetMVP.Application.DTOs.OperLog;
 using NetMVP.Application.Mappings;
 using NetMVP.Application.Services.Impl;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using Xunit;
 
@@ -43,7 +43,7 @@ public class SysOperLogServiceTests
         {
             OperId = 1,
             Title = "用户管理",
-            BusinessType = BusinessType.Insert,
+            BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT,
             OperTime = DateTime.Now
         };
 
@@ -80,9 +80,9 @@ public class SysOperLogServiceTests
         var dto = new CreateOperLogDto
         {
             Title = "用户管理",
-            BusinessType = BusinessType.Insert,
+            BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT,
             OperName = "admin",
-            Status = CommonStatus.Success
+            Status = CommonConstants.SUCCESS
         };
 
         long capturedOperId = 0;
@@ -100,7 +100,7 @@ public class SysOperLogServiceTests
         // Assert
         result.Should().Be(1);
         _operLogRepositoryMock.Verify(x => x.AddAsync(
-            It.Is<SysOperLog>(l => l.Title == "用户管理" && l.BusinessType == BusinessType.Insert),
+            It.Is<SysOperLog>(l => l.Title == "用户管理" && l.BusinessType == OperLogConstants.BUSINESS_TYPE_INSERT),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

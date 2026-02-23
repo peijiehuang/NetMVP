@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Interfaces;
 
@@ -46,11 +46,11 @@ public interface IPermissionService
     Task<bool> CheckDataScopeAsync(long userId, long deptId);
 
     /// <summary>
-    /// 获取用户的数据权限范围
+    /// 获取用户的数据权限范围（1全部 2自定义 3本部门 4本部门及以下 5仅本人）
     /// </summary>
     /// <param name="userId">用户ID</param>
     /// <returns>数据权限范围</returns>
-    Task<DataScopeType> GetUserDataScopeAsync(long userId);
+    Task<string> GetUserDataScopeAsync(long userId);
 
     /// <summary>
     /// 清除用户权限缓存

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Notice;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -54,7 +54,7 @@ public class SysNoticeController : ControllerBase
     /// </summary>
     [HttpPost]
     [RequirePermission("system:notice:add")]
-    [Log(Title = "通知公告", BusinessType = BusinessType.Insert)]
+    [Log(Title = "通知公告", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateNoticeDto dto)
     {
         if (!ModelState.IsValid)
@@ -72,7 +72,7 @@ public class SysNoticeController : ControllerBase
     /// </summary>
     [HttpPut]
     [RequirePermission("system:notice:edit")]
-    [Log(Title = "通知公告", BusinessType = BusinessType.Update)]
+    [Log(Title = "通知公告", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateNoticeDto dto)
     {
         if (!ModelState.IsValid)
@@ -97,7 +97,7 @@ public class SysNoticeController : ControllerBase
     /// </summary>
     [HttpDelete("{noticeIds}")]
     [RequirePermission("system:notice:remove")]
-    [Log(Title = "通知公告", BusinessType = BusinessType.Delete)]
+    [Log(Title = "通知公告", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string noticeIds)
     {
         try

@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.DTOs.OperLog;
 
@@ -20,7 +20,7 @@ public class OperLogDto
     /// <summary>
     /// 业务类型
     /// </summary>
-    public BusinessType BusinessType { get; set; }
+    public string BusinessType { get; set; }
 
     /// <summary>
     /// 方法名称
@@ -35,7 +35,7 @@ public class OperLogDto
     /// <summary>
     /// 操作类别
     /// </summary>
-    public OperatorType OperatorType { get; set; }
+    public string OperatorType { get; set; }
 
     /// <summary>
     /// 操作人员
@@ -75,7 +75,7 @@ public class OperLogDto
     /// <summary>
     /// 操作状态
     /// </summary>
-    public CommonStatus Status { get; set; }
+    public string Status { get; set; }
 
     /// <summary>
     /// 错误消息

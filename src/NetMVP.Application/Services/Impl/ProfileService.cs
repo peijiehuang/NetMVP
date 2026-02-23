@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NetMVP.Application.DTOs.Profile;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Exceptions;
 using NetMVP.Domain.Interfaces;
 
@@ -88,12 +88,7 @@ public class ProfileService : IProfileService
         user.NickName = dto.NickName;
         user.EmailValue = dto.Email;
         user.PhoneNumberValue = dto.Phonenumber;
-        
-        // 解析性别
-        if (!string.IsNullOrEmpty(dto.Sex) && Enum.TryParse<Gender>(dto.Sex, out var gender))
-        {
-            user.Gender = gender;
-        }
+        user.Sex = dto.Sex ?? UserConstants.SEX_UNKNOWN;
         
         user.UpdateBy = _currentUserService.GetUserName();
         user.UpdateTime = DateTime.Now;

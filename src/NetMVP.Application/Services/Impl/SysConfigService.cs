@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Config;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -54,8 +54,7 @@ public class SysConfigService : ISysConfigService
         // 系统内置
         if (!string.IsNullOrWhiteSpace(query.ConfigType))
         {
-            if (Enum.TryParse<YesNo>(query.ConfigType, out var configType))
-            queryable = queryable.Where(c => c.ConfigType == configType);
+            queryable = queryable.Where(c => c.ConfigType == query.ConfigType);
         }
 
         // 时间范围
@@ -189,7 +188,7 @@ public class SysConfigService : ISysConfigService
         }
 
         // 检查是否为系统内置参数
-        if (config.ConfigType == YesNo.Yes)
+        if (config.ConfigType == CommonConstants.YES)
         {
             throw new InvalidOperationException("系统内置参数不允许删除");
         }
@@ -257,8 +256,7 @@ public class SysConfigService : ISysConfigService
         // 系统内置
         if (!string.IsNullOrWhiteSpace(query.ConfigType))
         {
-            if (Enum.TryParse<YesNo>(query.ConfigType, out var configType))
-            queryable = queryable.Where(c => c.ConfigType == configType);
+            queryable = queryable.Where(c => c.ConfigType == query.ConfigType);
         }
 
         // 时间范围

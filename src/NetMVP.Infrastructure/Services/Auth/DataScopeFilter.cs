@@ -1,5 +1,5 @@
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using NetMVP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -93,7 +93,7 @@ public class DataScopeFilter : IDataScopeFilter
         if (await IsAdminAsync(userId))
         {
             var allDeptIds = await _deptRepository.GetQueryable()
-                .Where(d => d.Status == UserStatus.Normal)
+                .Where(d => d.Status == UserConstants.NORMAL)
                 .Select(d => d.DeptId)
                 .ToListAsync();
 
@@ -113,7 +113,7 @@ public class DataScopeFilter : IDataScopeFilter
         }
 
         var roles = await _roleRepository.GetQueryable()
-            .Where(r => roleIds.Contains(r.RoleId) && r.Status == UserStatus.Normal)
+            .Where(r => roleIds.Contains(r.RoleId) && r.Status == UserConstants.NORMAL)
             .ToListAsync();
 
         if (!roles.Any())
@@ -126,11 +126,11 @@ public class DataScopeFilter : IDataScopeFilter
 
         var deptIds = maxDataScope switch
         {
-            DataScopeType.All => await GetAllDeptIdsAsync(),
-            DataScopeType.Custom => await GetCustomDeptIdsAsync(roleIds),
-            DataScopeType.Department => await GetUserDeptIdsAsync(userId),
-            DataScopeType.DepartmentAndBelow => await GetUserDeptAndChildIdsAsync(userId),
-            DataScopeType.Self => await GetUserDeptIdsAsync(userId),
+            DataScopeConstants.DATA_SCOPE_ALL => await GetAllDeptIdsAsync(),
+            DataScopeConstants.DATA_SCOPE_CUSTOM => await GetCustomDeptIdsAsync(roleIds),
+            DataScopeConstants.DATA_SCOPE_DEPT => await GetUserDeptIdsAsync(userId),
+            DataScopeConstants.DATA_SCOPE_DEPT_AND_CHILD => await GetUserDeptAndChildIdsAsync(userId),
+            DataScopeConstants.DATA_SCOPE_SELF => await GetUserDeptIdsAsync(userId),
             _ => Enumerable.Empty<long>()
         };
 
@@ -159,7 +159,7 @@ public class DataScopeFilter : IDataScopeFilter
     private async Task<IEnumerable<long>> GetAllDeptIdsAsync()
     {
         return await _deptRepository.GetQueryable()
-            .Where(d => d.Status == UserStatus.Normal)
+            .Where(d => d.Status == UserConstants.NORMAL)
             .Select(d => d.DeptId)
             .ToListAsync();
     }
@@ -207,7 +207,7 @@ public class DataScopeFilter : IDataScopeFilter
         var deptIds = await _deptRepository.GetQueryable()
             .Where(d => d.DeptId == userDeptId 
                 || (d.Ancestors != null && d.Ancestors.Contains($",{userDeptId},")))
-            .Where(d => d.Status == UserStatus.Normal)
+            .Where(d => d.Status == UserConstants.NORMAL)
             .Select(d => d.DeptId)
             .ToListAsync();
 

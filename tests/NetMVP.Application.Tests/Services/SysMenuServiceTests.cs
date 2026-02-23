@@ -5,7 +5,7 @@ using NetMVP.Application.DTOs.Menu;
 using NetMVP.Application.Mappings;
 using NetMVP.Application.Services.Impl;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using Xunit;
 
@@ -66,7 +66,7 @@ public class SysMenuServiceTests
         { 
             MenuId = menuId, 
             MenuName = "测试菜单",
-            MenuType = MenuType.Menu,
+            MenuType = UserConstants.TYPE_MENU,
             Path = "/test"
         };
         

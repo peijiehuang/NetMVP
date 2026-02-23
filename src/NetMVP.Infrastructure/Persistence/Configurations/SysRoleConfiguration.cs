@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -21,11 +20,11 @@ public class SysRoleConfiguration : IEntityTypeConfiguration<SysRole>
         builder.Property(e => e.RoleName).HasColumnName("role_name").HasMaxLength(30).IsRequired();
         builder.Property(e => e.RoleKey).HasColumnName("role_key").HasMaxLength(100).IsRequired();
         builder.Property(e => e.RoleSort).HasColumnName("role_sort");
-        builder.Property(e => e.DataScope).HasColumnName("data_scope").HasConversion(EnumConverters.DataScopeTypeConverter).HasDefaultValue(DataScopeType.All);
+        builder.Property(e => e.DataScope).HasColumnName("data_scope").HasMaxLength(1).HasDefaultValue(DataScopeConstants.DATA_SCOPE_ALL);
         builder.Property(e => e.MenuCheckStrictly).HasColumnName("menu_check_strictly").HasDefaultValue(true);
         builder.Property(e => e.DeptCheckStrictly).HasColumnName("dept_check_strictly").HasDefaultValue(true);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter);
-        builder.Property(e => e.DelFlag).HasColumnName("del_flag").HasConversion(EnumConverters.DelFlagConverter);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(UserConstants.NORMAL);
+        builder.Property(e => e.DelFlag).HasColumnName("del_flag").HasMaxLength(1).HasDefaultValue(UserConstants.DEL_FLAG_EXIST);
 
         // BaseEntity 字段
         builder.Property(e => e.CreateBy).HasColumnName("create_by").HasMaxLength(64);

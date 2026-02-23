@@ -2,9 +2,8 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.User;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
-using NetMVP.Domain.ValueObjects;
 
 namespace NetMVP.Application.Services.Impl;
 
@@ -68,8 +67,7 @@ public class SysUserService : ISysUserService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(u => u.Status == status);
+            queryable = queryable.Where(u => u.Status == query.Status);
         }
 
         // 部门ID
@@ -171,7 +169,7 @@ public class SysUserService : ISysUserService
             UserName = dto.UserName,
             NickName = dto.NickName,
             DeptId = dto.DeptId,
-            Gender = dto.Gender,
+            Sex = dto.Sex ?? UserConstants.SEX_UNKNOWN,
             Status = dto.Status,
             Remark = dto.Remark
         };
@@ -264,20 +262,10 @@ public class SysUserService : ISysUserService
         user.NickName = dto.NickName;
         user.DeptId = dto.DeptId;
         
-        // 处理性别：如果前端发送了Sex字符串，转换为Gender枚举
+        // 处理性别
         if (!string.IsNullOrWhiteSpace(dto.Sex))
         {
-            user.Gender = dto.Sex switch
-            {
-                "0" => Gender.Male,
-                "1" => Gender.Female,
-                "2" => Gender.Unknown,
-                _ => dto.Gender
-            };
-        }
-        else
-        {
-            user.Gender = dto.Gender;
+            user.Sex = dto.Sex;
         }
         
         user.Status = dto.Status;
@@ -446,7 +434,7 @@ public class SysUserService : ISysUserService
     /// <summary>
     /// 修改用户状态
     /// </summary>
-    public async Task UpdateUserStatusAsync(long userId, UserStatus status, CancellationToken cancellationToken = default)
+    public async Task UpdateUserStatusAsync(long userId, string status, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null)
@@ -496,8 +484,7 @@ public class SysUserService : ISysUserService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(u => u.Status == status);
+            queryable = queryable.Where(u => u.Status == query.Status);
         }
 
         // 部门ID
@@ -644,7 +631,7 @@ public class SysUserService : ISysUserService
 
         // 更新个人信息
         user.NickName = dto.NickName;
-        user.Gender = dto.Gender;
+        user.Sex = dto.Sex ?? UserConstants.SEX_UNKNOWN;
 
         // 更新手机号
         if (!string.IsNullOrWhiteSpace(dto.Phonenumber))
@@ -781,7 +768,7 @@ public class SysUserService : ISysUserService
         // 查询已分配该角色的用户
         var query = from u in dbContext.Set<SysUser>()
                     join ur in dbContext.Set<SysUserRole>() on u.UserId equals ur.UserId
-                    where ur.RoleId == roleId && u.DelFlag == DelFlag.Exist
+                    where ur.RoleId == roleId && u.DelFlag == UserConstants.DEL_FLAG_EXIST
                     select u;
 
         // 用户名筛选
@@ -847,7 +834,7 @@ public class SysUserService : ISysUserService
 
         // 查询未分配该角色的用户
         var query = dbContext.Set<SysUser>()
-            .Where(u => u.DelFlag == DelFlag.Exist && !allocatedUserIds.Contains(u.UserId));
+            .Where(u => u.DelFlag == UserConstants.DEL_FLAG_EXIST && !allocatedUserIds.Contains(u.UserId));
 
         // 用户名筛选
         if (!string.IsNullOrWhiteSpace(userName))
@@ -945,7 +932,7 @@ public class SysUserService : ISysUserService
                     existingUser.PhoneNumberValue = !string.IsNullOrWhiteSpace(importUser.PhoneNumber) 
                         ? importUser.PhoneNumber 
                         : existingUser.PhoneNumberValue;
-                    existingUser.Gender = gender ?? existingUser.Gender;
+                    existingUser.Sex = gender ?? existingUser.Sex;
                     existingUser.Status = status ?? existingUser.Status;
                     existingUser.UpdateBy = currentUserName;
                     existingUser.UpdateTime = DateTime.Now;
@@ -962,8 +949,8 @@ public class SysUserService : ISysUserService
                         NickName = importUser.NickName ?? importUser.UserName,
                         EmailValue = importUser.Email,
                         PhoneNumberValue = importUser.PhoneNumber,
-                        Gender = gender ?? Gender.Unknown,
-                        Status = status ?? UserStatus.Normal,
+                        Sex = gender ?? UserConstants.SEX_UNKNOWN,
+                        Status = status ?? UserConstants.NORMAL,
                         Password = BCrypt.Net.BCrypt.HashPassword("123456"), // 默认密码
                         DeptId = importUser.DeptId ?? 100, // 默认部门
                         CreateBy = currentUserName,
@@ -1026,19 +1013,19 @@ public class SysUserService : ISysUserService
     /// <summary>
     /// 解析性别字符串
     /// </summary>
-    private Gender? ParseGender(string? genderStr)
+    private string? ParseGender(string? genderStr)
     {
         if (string.IsNullOrWhiteSpace(genderStr))
             return null;
 
         return genderStr switch
         {
-            "男" => Gender.Male,
-            "女" => Gender.Female,
-            "未知" => Gender.Unknown,
-            "0" => Gender.Male,
-            "1" => Gender.Female,
-            "2" => Gender.Unknown,
+            "男" => UserConstants.SEX_MALE,
+            "女" => UserConstants.SEX_FEMALE,
+            "未知" => UserConstants.SEX_UNKNOWN,
+            "0" => UserConstants.SEX_MALE,
+            "1" => UserConstants.SEX_FEMALE,
+            "2" => UserConstants.SEX_UNKNOWN,
             _ => null
         };
     }
@@ -1046,17 +1033,17 @@ public class SysUserService : ISysUserService
     /// <summary>
     /// 解析用户状态字符串
     /// </summary>
-    private UserStatus? ParseUserStatus(string? statusStr)
+    private string? ParseUserStatus(string? statusStr)
     {
         if (string.IsNullOrWhiteSpace(statusStr))
             return null;
 
         return statusStr switch
         {
-            "正常" => UserStatus.Normal,
-            "停用" => UserStatus.Disabled,
-            "0" => UserStatus.Normal,
-            "1" => UserStatus.Disabled,
+            "正常" => UserConstants.NORMAL,
+            "停用" => UserConstants.USER_DISABLE,
+            "0" => UserConstants.NORMAL,
+            "1" => UserConstants.USER_DISABLE,
             _ => null
         };
     }

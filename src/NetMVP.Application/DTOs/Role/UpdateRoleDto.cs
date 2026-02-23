@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Role;
@@ -36,7 +36,7 @@ public class UpdateRoleDto
     /// <summary>
     /// 数据范围
     /// </summary>
-    public DataScopeType DataScope { get; set; } = DataScopeType.Department;
+    public string DataScope { get; set; } = DataScopeConstants.DATA_SCOPE_DEPT;
 
     /// <summary>
     /// 菜单树选择项是否关联显示
@@ -51,7 +51,7 @@ public class UpdateRoleDto
     /// <summary>
     /// 角色状态
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
     /// 菜单ID列表

@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.ValueObjects;
 
 namespace NetMVP.Domain.Entities;
@@ -19,9 +19,9 @@ public class SysOperLog
     public string? Title { get; set; }
 
     /// <summary>
-    /// 业务类型
+    /// 业务类型（0其它 1新增 2修改 3删除）
     /// </summary>
-    public BusinessType BusinessType { get; set; } = BusinessType.Other;
+    public string BusinessType { get; set; } = OperLogConstants.BUSINESS_TYPE_OTHER;
 
     /// <summary>
     /// 方法名称
@@ -34,9 +34,9 @@ public class SysOperLog
     public string? RequestMethod { get; set; }
 
     /// <summary>
-    /// 操作类别
+    /// 操作类别（0其它 1后台用户 2手机端用户）
     /// </summary>
-    public OperatorType OperatorType { get; set; } = OperatorType.Other;
+    public string OperatorType { get; set; } = OperLogConstants.OPERATOR_TYPE_OTHER;
 
     /// <summary>
     /// 操作人员
@@ -74,9 +74,9 @@ public class SysOperLog
     public string? JsonResult { get; set; }
 
     /// <summary>
-    /// 操作状态
+    /// 操作状态（0成功 1失败）
     /// </summary>
-    public CommonStatus Status { get; set; } = CommonStatus.Success;
+    public string Status { get; set; } = CommonConstants.SUCCESS;
 
     /// <summary>
     /// 错误消息

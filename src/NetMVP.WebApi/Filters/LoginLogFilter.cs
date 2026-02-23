@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NetMVP.Application.DTOs.LoginInfo;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.WebApi.Filters;
 
@@ -68,7 +68,7 @@ public class LoginLogFilter : IAsyncActionFilter
         // 判断操作是否成功
         if (executedContext.Exception != null)
         {
-            logDto.Status = CommonStatus.Failure;
+            logDto.Status = CommonConstants.FAIL;
             logDto.Msg = executedContext.Exception.Message;
         }
         else if (executedContext.Result is ObjectResult objectResult)
@@ -78,24 +78,24 @@ public class LoginLogFilter : IAsyncActionFilter
             {
                 if (dict.TryGetValue("code", out var code) && code?.ToString() == "200")
                 {
-                    logDto.Status = CommonStatus.Success;
+                    logDto.Status = CommonConstants.SUCCESS;
                     logDto.Msg = path.Contains("/login") ? "登录成功" : "退出成功";
                 }
                 else
                 {
-                    logDto.Status = CommonStatus.Failure;
+                    logDto.Status = CommonConstants.FAIL;
                     logDto.Msg = dict.TryGetValue("msg", out var msg) ? msg?.ToString() ?? "操作失败" : "操作失败";
                 }
             }
             else
             {
-                logDto.Status = CommonStatus.Success;
+                logDto.Status = CommonConstants.SUCCESS;
                 logDto.Msg = path.Contains("/login") ? "登录成功" : "退出成功";
             }
         }
         else
         {
-            logDto.Status = CommonStatus.Success;
+            logDto.Status = CommonConstants.SUCCESS;
             logDto.Msg = path.Contains("/login") ? "登录成功" : "退出成功";
         }
 

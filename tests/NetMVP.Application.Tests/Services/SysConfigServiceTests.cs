@@ -5,7 +5,7 @@ using NetMVP.Application.DTOs.Config;
 using NetMVP.Application.Mappings;
 using NetMVP.Application.Services.Impl;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using Xunit;
 
@@ -68,7 +68,7 @@ public class SysConfigServiceTests
             ConfigName = "测试参数",
             ConfigKey = "test.key",
             ConfigValue = "test value",
-            ConfigType = YesNo.No
+            ConfigType = CommonConstants.NO
         };
 
         _configRepositoryMock.Setup(x => x.GetByIdAsync(configId, It.IsAny<CancellationToken>()))
@@ -108,7 +108,7 @@ public class SysConfigServiceTests
             ConfigName = "系统内置参数",
             ConfigKey = "sys.builtin",
             ConfigValue = "value",
-            ConfigType = YesNo.Yes
+            ConfigType = CommonConstants.YES
         };
 
         _configRepositoryMock.Setup(x => x.GetByIdAsync(configId, It.IsAny<CancellationToken>()))

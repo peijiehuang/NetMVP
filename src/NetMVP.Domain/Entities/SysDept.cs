@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.ValueObjects;
 
 namespace NetMVP.Domain.Entities;
@@ -50,14 +50,14 @@ public class SysDept : BaseEntity
     public string? EmailValue { get; set; }
 
     /// <summary>
-    /// 状态
+    /// 状态（0正常 1停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
-    /// 删除标志
+    /// 删除标志（0存在 2删除）
     /// </summary>
-    public DelFlag DelFlag { get; set; } = DelFlag.Exist;
+    public string DelFlag { get; set; } = UserConstants.DEL_FLAG_EXIST;
 
     /// <summary>
     /// 子部门

@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Notice;
@@ -19,7 +19,7 @@ public class CreateNoticeDto
     /// 公告类型
     /// </summary>
     [Required(ErrorMessage = "公告类型不能为空")]
-    public NoticeType NoticeType { get; set; } = NoticeType.Notice;
+    public string NoticeType { get; set; } = NoticeConstants.NOTICE_TYPE_NOTICE;
 
     /// <summary>
     /// 公告内容
@@ -29,7 +29,7 @@ public class CreateNoticeDto
     /// <summary>
     /// 公告状态
     /// </summary>
-    public NoticeStatus Status { get; set; } = NoticeStatus.Normal;
+    public string Status { get; set; } = NoticeConstants.NOTICE_STATUS_NORMAL;
 
     /// <summary>
     /// 备注

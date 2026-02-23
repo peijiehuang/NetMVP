@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.User;
@@ -18,5 +18,5 @@ public class UpdateUserStatusDto
     /// 状态
     /// </summary>
     [Required(ErrorMessage = "状态不能为空")]
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 }

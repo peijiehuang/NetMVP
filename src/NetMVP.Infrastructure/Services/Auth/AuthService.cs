@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using NetMVP.Infrastructure.Configuration;
 
@@ -57,10 +57,10 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("用户名或密码错误");
 
         // 检查用户状态
-        if (user.Status == UserStatus.Disabled)
+        if (user.Status == UserConstants.USER_DISABLE)
             throw new UnauthorizedAccessException("用户已被停用");
 
-        if (user.DelFlag == DelFlag.Deleted)
+        if (user.DelFlag == UserConstants.DEL_FLAG_DELETED)
             throw new UnauthorizedAccessException("用户已被删除");
 
         // 生成 Token

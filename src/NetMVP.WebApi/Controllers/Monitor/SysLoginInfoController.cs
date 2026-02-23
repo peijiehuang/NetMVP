@@ -3,7 +3,7 @@ using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.LoginInfo;
 using NetMVP.Application.Services;
 using NetMVP.WebApi.Attributes;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.WebApi.Controllers.Monitor;
 
@@ -34,7 +34,7 @@ public class SysLoginInfoController : BaseController
     /// 删除登录日志
     /// </summary>
     [HttpDelete("{infoIds}")]
-    [Log(Title = "登录日志", BusinessType = BusinessType.Delete)]
+    [Log(Title = "登录日志", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Delete(string infoIds)
     {
         var ids = infoIds.Split(',').Select(long.Parse).ToArray();
@@ -46,7 +46,7 @@ public class SysLoginInfoController : BaseController
     /// 清空登录日志
     /// </summary>
     [HttpDelete("clean")]
-    [Log(Title = "登录日志", BusinessType = BusinessType.Clean)]
+    [Log(Title = "登录日志", BusinessType = OperLogConstants.BUSINESS_TYPE_CLEAN)]
     public async Task<AjaxResult> Clean()
     {
         var count = await _loginInfoService.CleanLoginInfoAsync();
@@ -57,7 +57,7 @@ public class SysLoginInfoController : BaseController
     /// 解锁用户
     /// </summary>
     [HttpPut("unlock/{userName}")]
-    [Log(Title = "账户解锁", BusinessType = BusinessType.Other)]
+    [Log(Title = "账户解锁", BusinessType = OperLogConstants.BUSINESS_TYPE_OTHER)]
     public async Task<AjaxResult> Unlock(string userName)
     {
         await _loginInfoService.UnlockUserAsync(userName);
@@ -68,7 +68,7 @@ public class SysLoginInfoController : BaseController
     /// 导出登录日志
     /// </summary>
     [HttpPost("export")]
-    [Log(Title = "登录日志", BusinessType = BusinessType.Export)]
+    [Log(Title = "登录日志", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] LoginInfoQueryDto query)
     {
         var data = await _loginInfoService.ExportLoginInfosAsync(query);

@@ -1,5 +1,4 @@
 using MiniExcelLibs.Attributes;
-using NetMVP.Domain.Enums;
 
 namespace NetMVP.Application.DTOs.User;
 

@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Config;
@@ -34,7 +34,7 @@ public class CreateConfigDto
     /// </summary>
     [Required(ErrorMessage = "系统内置标识不能为空")]
     [RegularExpression("^[YN]$", ErrorMessage = "系统内置标识格式不正确")]
-    public YesNo ConfigType { get; set; } = YesNo.No;
+    public string ConfigType { get; set; } = CommonConstants.NO;
 
     /// <summary>
     /// 备注

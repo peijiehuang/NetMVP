@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Tests.Entities;
 
@@ -39,11 +39,11 @@ public class SysRoleTests
         var role = new SysRole();
 
         // Assert
-        role.DataScope.Should().Be(DataScopeType.All);
+        role.DataScope.Should().Be(DataScopeConstants.DATA_SCOPE_ALL);
         role.MenuCheckStrictly.Should().BeTrue();
         role.DeptCheckStrictly.Should().BeTrue();
-        role.Status.Should().Be(UserStatus.Normal);
-        role.DelFlag.Should().Be(DelFlag.Exist);
+        role.Status.Should().Be(UserConstants.NORMAL);
+        role.DelFlag.Should().Be(UserConstants.DEL_FLAG_EXIST);
         role.RoleMenus.Should().NotBeNull().And.BeEmpty();
         role.RoleDepts.Should().NotBeNull().And.BeEmpty();
     }

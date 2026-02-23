@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Dict;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -55,7 +55,7 @@ public class SysDictTypeController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:dict:add")]
-    [Log(Title = "字典类型", BusinessType = BusinessType.Insert)]
+    [Log(Title = "字典类型", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateDictTypeDto dto)
     {
         try
@@ -74,7 +74,7 @@ public class SysDictTypeController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:dict:edit")]
-    [Log(Title = "字典类型", BusinessType = BusinessType.Update)]
+    [Log(Title = "字典类型", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateDictTypeDto dto)
     {
         try
@@ -93,7 +93,7 @@ public class SysDictTypeController : BaseController
     /// </summary>
     [HttpDelete("{dictIds}")]
     [RequirePermission("system:dict:remove")]
-    [Log(Title = "字典类型", BusinessType = BusinessType.Delete)]
+    [Log(Title = "字典类型", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string dictIds)
     {
         try
@@ -113,7 +113,7 @@ public class SysDictTypeController : BaseController
     /// </summary>
     [HttpDelete("refreshCache")]
     [RequirePermission("system:dict:remove")]
-    [Log(Title = "字典类型", BusinessType = BusinessType.Clean)]
+    [Log(Title = "字典类型", BusinessType = OperLogConstants.BUSINESS_TYPE_CLEAN)]
     public async Task<AjaxResult> RefreshCache()
     {
         await _dictTypeService.RefreshDictCacheAsync();
@@ -125,7 +125,7 @@ public class SysDictTypeController : BaseController
     /// </summary>
     [HttpPost("export")]
     [RequirePermission("system:dict:export")]
-    [Log(Title = "字典类型", BusinessType = BusinessType.Export)]
+    [Log(Title = "字典类型", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] DictTypeQueryDto query)
     {
         var data = await _dictTypeService.ExportDictTypesAsync(query);

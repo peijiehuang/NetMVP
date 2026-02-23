@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.User;
@@ -42,19 +42,14 @@ public class UpdateUserDto
     public string? Email { get; set; }
 
     /// <summary>
-    /// 性别
+    /// 性别（0男 1女 2未知）
     /// </summary>
-    public Gender Gender { get; set; } = Gender.Unknown;
-
-    /// <summary>
-    /// 性别字符串（前端发送的格式）
-    /// </summary>
-    public string? Sex { get; set; }
+    public string Sex { get; set; } = UserConstants.SEX_UNKNOWN;
 
     /// <summary>
     /// 状态
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
     /// 备注

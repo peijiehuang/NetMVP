@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Menu;
@@ -57,17 +57,17 @@ public class CreateMenuDto
     /// 菜单类型（Directory目录 Menu菜单 Button按钮）
     /// </summary>
     [Required(ErrorMessage = "菜单类型不能为空")]
-    public MenuType MenuType { get; set; } = MenuType.Menu;
+    public string MenuType { get; set; } = UserConstants.TYPE_MENU;
 
     /// <summary>
     /// 显示状态（Show显示 Hide隐藏）
     /// </summary>
-    public VisibleStatus Visible { get; set; } = VisibleStatus.Show;
+    public string Visible { get; set; } = CommonConstants.VISIBLE_SHOW;
 
     /// <summary>
     /// 菜单状态（Normal正常 Disabled停用）
     /// </summary>
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
     /// 权限标识

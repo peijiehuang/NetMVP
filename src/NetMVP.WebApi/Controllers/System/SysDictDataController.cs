@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Dict;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -65,7 +65,7 @@ public class SysDictDataController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:dict:add")]
-    [Log(Title = "字典数据", BusinessType = BusinessType.Insert)]
+    [Log(Title = "字典数据", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateDictDataDto dto)
     {
         try
@@ -84,7 +84,7 @@ public class SysDictDataController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:dict:edit")]
-    [Log(Title = "字典数据", BusinessType = BusinessType.Update)]
+    [Log(Title = "字典数据", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateDictDataDto dto)
     {
         try
@@ -103,7 +103,7 @@ public class SysDictDataController : BaseController
     /// </summary>
     [HttpDelete("{dictCodes}")]
     [RequirePermission("system:dict:remove")]
-    [Log(Title = "字典数据", BusinessType = BusinessType.Delete)]
+    [Log(Title = "字典数据", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string dictCodes)
     {
         try
@@ -123,7 +123,7 @@ public class SysDictDataController : BaseController
     /// </summary>
     [HttpPost("export")]
     [RequirePermission("system:dict:export")]
-    [Log(Title = "字典数据", BusinessType = BusinessType.Export)]
+    [Log(Title = "字典数据", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] DictDataQueryDto query)
     {
         var data = await _dictDataService.ExportDictDataAsync(query);

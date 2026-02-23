@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Config;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -65,7 +65,7 @@ public class SysConfigController : ControllerBase
     /// 创建参数
     /// </summary>
     [HttpPost]
-    [Log(Title = "参数管理", BusinessType = BusinessType.Insert)]
+    [Log(Title = "参数管理", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateConfigDto dto)
     {
         if (!ModelState.IsValid)
@@ -82,7 +82,7 @@ public class SysConfigController : ControllerBase
     /// 更新参数
     /// </summary>
     [HttpPut]
-    [Log(Title = "参数管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "参数管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateConfigDto dto)
     {
         if (!ModelState.IsValid)
@@ -99,7 +99,7 @@ public class SysConfigController : ControllerBase
     /// 删除参数
     /// </summary>
     [HttpDelete("{configIds}")]
-    [Log(Title = "参数管理", BusinessType = BusinessType.Delete)]
+    [Log(Title = "参数管理", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string configIds)
     {
         var ids = configIds.Split(',').Select(int.Parse).ToArray();
@@ -111,7 +111,7 @@ public class SysConfigController : ControllerBase
     /// 刷新参数缓存
     /// </summary>
     [HttpDelete("refreshCache")]
-    [Log(Title = "参数管理", BusinessType = BusinessType.Clean)]
+    [Log(Title = "参数管理", BusinessType = OperLogConstants.BUSINESS_TYPE_CLEAN)]
     public async Task<AjaxResult> RefreshCache()
     {
         await _configService.RefreshConfigCacheAsync();
@@ -122,7 +122,7 @@ public class SysConfigController : ControllerBase
     /// 导出参数
     /// </summary>
     [HttpPost("export")]
-    [Log(Title = "参数管理", BusinessType = BusinessType.Export)]
+    [Log(Title = "参数管理", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] ConfigQueryDto query)
     {
         var data = await _configService.ExportConfigsAsync(query);

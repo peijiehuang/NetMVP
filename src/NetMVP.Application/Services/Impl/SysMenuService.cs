@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Menu;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Services.Impl;
@@ -57,8 +57,7 @@ public class SysMenuService : ISysMenuService
         // 状态
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
-            if (Enum.TryParse<UserStatus>(query.Status, out var status))
-            queryable = queryable.Where(m => m.Status == status);
+            queryable = queryable.Where(m => m.Status == query.Status);
         }
 
         var menus = await queryable
@@ -210,7 +209,7 @@ public class SysMenuService : ISysMenuService
     public async Task<List<MenuTreeDto>> GetMenuTreeByRoleIdAsync(long roleId, CancellationToken cancellationToken = default)
     {
         var allMenus = await _menuRepository.GetQueryable()
-            .Where(m => m.Status == UserStatus.Normal)
+            .Where(m => m.Status == UserConstants.NORMAL)
             .OrderBy(m => m.ParentId)
             .ThenBy(m => m.OrderNum)
             .ToListAsync(cancellationToken);
@@ -306,7 +305,7 @@ public class SysMenuService : ISysMenuService
     public async Task<List<MenuTreeDto>> GetMenuTreeSelectAsync(CancellationToken cancellationToken = default)
     {
         var menus = await _menuRepository.GetQueryable()
-            .Where(m => m.Status == UserStatus.Normal)
+            .Where(m => m.Status == UserConstants.NORMAL)
             .OrderBy(m => m.ParentId)
             .ThenBy(m => m.OrderNum)
             .ToListAsync(cancellationToken);
@@ -332,7 +331,7 @@ public class SysMenuService : ISysMenuService
         if (user.IsAdmin())
         {
             var allMenus = await _menuRepository.GetQueryable()
-                .Where(m => m.Status == UserStatus.Normal)
+                .Where(m => m.Status == UserConstants.NORMAL)
                 .OrderBy(m => m.ParentId)
                 .ThenBy(m => m.OrderNum)
                 .ToListAsync(cancellationToken);
@@ -364,7 +363,7 @@ public class SysMenuService : ISysMenuService
         }
 
         var menus = await _menuRepository.GetQueryable()
-            .Where(m => menuIds.Contains(m.MenuId) && m.Status == UserStatus.Normal)
+            .Where(m => menuIds.Contains(m.MenuId) && m.Status == UserConstants.NORMAL)
             .OrderBy(m => m.ParentId)
             .ThenBy(m => m.OrderNum)
             .ToListAsync(cancellationToken);

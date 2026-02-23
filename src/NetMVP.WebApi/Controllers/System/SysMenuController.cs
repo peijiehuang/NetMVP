@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Menu;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 using System.Security.Claims;
 
@@ -67,7 +67,7 @@ public class SysMenuController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:menu:add")]
-    [Log(Title = "菜单管理", BusinessType = BusinessType.Insert)]
+    [Log(Title = "菜单管理", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateMenuDto dto)
     {
         try
@@ -86,7 +86,7 @@ public class SysMenuController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:menu:edit")]
-    [Log(Title = "菜单管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "菜单管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateMenuDto dto)
     {
         try
@@ -105,7 +105,7 @@ public class SysMenuController : BaseController
     /// </summary>
     [HttpDelete("{menuId}")]
     [RequirePermission("system:menu:remove")]
-    [Log(Title = "菜单管理", BusinessType = BusinessType.Delete)]
+    [Log(Title = "菜单管理", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(long menuId)
     {
         try

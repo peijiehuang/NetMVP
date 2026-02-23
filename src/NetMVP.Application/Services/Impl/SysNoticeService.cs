@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using NetMVP.Application.DTOs.Notice;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using System.Text;
 
@@ -41,9 +41,9 @@ public class SysNoticeService : ISysNoticeService
         }
 
         // 公告类型
-        if (!string.IsNullOrWhiteSpace(query.NoticeType) && Enum.TryParse<NoticeType>(query.NoticeType, out var noticeType))
+        if (!string.IsNullOrWhiteSpace(query.NoticeType))
         {
-            queryable = queryable.Where(n => n.NoticeType == noticeType);
+            queryable = queryable.Where(n => n.NoticeType == query.NoticeType);
         }
 
         // 创建者

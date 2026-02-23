@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -23,7 +22,7 @@ public class SysLoginInfoConfiguration : IEntityTypeConfiguration<SysLoginInfo>
         builder.Property(e => e.LoginLocation).HasColumnName("login_location").HasMaxLength(255);
         builder.Property(e => e.Browser).HasColumnName("browser").HasMaxLength(50);
         builder.Property(e => e.Os).HasColumnName("os").HasMaxLength(50);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.CommonStatusConverter).HasDefaultValue(CommonStatus.Success);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(CommonConstants.SUCCESS);
         builder.Property(e => e.Msg).HasColumnName("msg").HasMaxLength(255);
         builder.Property(e => e.LoginTime).HasColumnName("login_time");
 

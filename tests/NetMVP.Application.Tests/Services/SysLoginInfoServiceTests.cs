@@ -4,7 +4,7 @@ using Moq;
 using NetMVP.Application.DTOs.LoginInfo;
 using NetMVP.Application.Services.Impl;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 
 namespace NetMVP.Application.Tests.Services;
@@ -41,7 +41,7 @@ public class SysLoginInfoServiceTests
             LoginLocation = "内网IP",
             Browser = "Chrome",
             Os = "Windows",
-            Status = CommonStatus.Success,
+            Status = CommonConstants.SUCCESS,
             Msg = "登录成功"
         };
 

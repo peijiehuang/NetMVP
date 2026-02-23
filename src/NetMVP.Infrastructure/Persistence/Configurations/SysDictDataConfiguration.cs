@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Entities;
-using NetMVP.Domain.Enums;
-using NetMVP.Infrastructure.Persistence.Converters;
 
 namespace NetMVP.Infrastructure.Persistence.Configurations;
 
@@ -24,8 +23,8 @@ public class SysDictDataConfiguration : IEntityTypeConfiguration<SysDictData>
         builder.Property(e => e.DictType).HasColumnName("dict_type").HasMaxLength(100).IsRequired();
         builder.Property(e => e.CssClass).HasColumnName("css_class").HasMaxLength(100);
         builder.Property(e => e.ListClass).HasColumnName("list_class").HasMaxLength(100);
-        builder.Property(e => e.IsDefault).HasColumnName("is_default").HasConversion(EnumConverters.YesNoConverter).HasDefaultValue(YesNo.No);
-        builder.Property(e => e.Status).HasColumnName("status").HasConversion(EnumConverters.UserStatusConverter).HasDefaultValue(UserStatus.Normal);
+        builder.Property(e => e.IsDefault).HasColumnName("is_default").HasMaxLength(1).HasDefaultValue(CommonConstants.NO);
+        builder.Property(e => e.Status).HasColumnName("status").HasMaxLength(1).HasDefaultValue(UserConstants.NORMAL);
 
         // BaseEntity 字段
         builder.Property(e => e.CreateBy).HasColumnName("create_by").HasMaxLength(64);

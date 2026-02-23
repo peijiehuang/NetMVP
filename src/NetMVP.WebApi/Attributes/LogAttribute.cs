@@ -1,5 +1,3 @@
-using NetMVP.Domain.Enums;
-
 namespace NetMVP.WebApi.Attributes;
 
 /// <summary>
@@ -14,9 +12,9 @@ public class LogAttribute : Attribute
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// 业务类型
+    /// 业务类型（0其它 1新增 2修改 3删除 4授权 5导出 6导入 7强退 8生成代码 9清空数据）
     /// </summary>
-    public BusinessType BusinessType { get; set; } = BusinessType.Other;
+    public string BusinessType { get; set; } = "0";
 
     /// <summary>
     /// 是否保存请求参数

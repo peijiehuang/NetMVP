@@ -1,5 +1,5 @@
 using NetMVP.Application.DTOs.User;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Application.Services;
 
@@ -51,7 +51,7 @@ public interface ISysUserService
     /// <summary>
     /// 修改用户状态
     /// </summary>
-    Task UpdateUserStatusAsync(long userId, UserStatus status, CancellationToken cancellationToken = default);
+    Task UpdateUserStatusAsync(long userId, string status, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 导出用户

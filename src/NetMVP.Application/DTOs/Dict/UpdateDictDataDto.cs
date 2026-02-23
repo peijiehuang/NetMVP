@@ -1,4 +1,4 @@
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetMVP.Application.DTOs.Dict;
@@ -56,13 +56,13 @@ public class UpdateDictDataDto
     /// 是否默认（Y是 N否）
     /// </summary>
     [Required(ErrorMessage = "是否默认不能为空")]
-    public YesNo IsDefault { get; set; } = YesNo.No;
+    public string IsDefault { get; set; } = CommonConstants.NO;
 
     /// <summary>
     /// 状态（0正常 1停用）
     /// </summary>
     [Required(ErrorMessage = "状态不能为空")]
-    public UserStatus Status { get; set; } = UserStatus.Normal;
+    public string Status { get; set; } = UserConstants.NORMAL;
 
     /// <summary>
     /// 备注

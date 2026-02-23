@@ -1,5 +1,5 @@
 using NetMVP.Domain.Common;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 
 namespace NetMVP.Domain.Entities;
 
@@ -29,7 +29,7 @@ public class SysConfig : BaseEntity
     public string ConfigValue { get; set; } = string.Empty;
 
     /// <summary>
-    /// 系统内置
+    /// 系统内置（Y是 N否）
     /// </summary>
-    public YesNo ConfigType { get; set; } = YesNo.No;
+    public string ConfigType { get; set; } = CommonConstants.NO;
 }

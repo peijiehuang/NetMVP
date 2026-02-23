@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Post;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -55,7 +55,7 @@ public class SysPostController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:post:add")]
-    [Log(Title = "岗位管理", BusinessType = BusinessType.Insert)]
+    [Log(Title = "岗位管理", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreatePostDto dto)
     {
         try
@@ -74,7 +74,7 @@ public class SysPostController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:post:edit")]
-    [Log(Title = "岗位管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "岗位管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdatePostDto dto)
     {
         try
@@ -93,7 +93,7 @@ public class SysPostController : BaseController
     /// </summary>
     [HttpDelete("{postIds}")]
     [RequirePermission("system:post:remove")]
-    [Log(Title = "岗位管理", BusinessType = BusinessType.Delete)]
+    [Log(Title = "岗位管理", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(string postIds)
     {
         try
@@ -113,7 +113,7 @@ public class SysPostController : BaseController
     /// </summary>
     [HttpPost("export")]
     [RequirePermission("system:post:export")]
-    [Log(Title = "岗位管理", BusinessType = BusinessType.Export)]
+    [Log(Title = "岗位管理", BusinessType = OperLogConstants.BUSINESS_TYPE_EXPORT)]
     public async Task<IActionResult> Export([FromForm] PostQueryDto query)
     {
         var data = await _postService.ExportPostsAsync(query);

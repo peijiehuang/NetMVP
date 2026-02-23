@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NetMVP.Application.Common.Models;
 using NetMVP.Application.DTOs.Dept;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 
 namespace NetMVP.WebApi.Controllers.System;
@@ -77,7 +77,7 @@ public class SysDeptController : BaseController
     /// </summary>
     [HttpPost]
     [RequirePermission("system:dept:add")]
-    [Log(Title = "部门管理", BusinessType = BusinessType.Insert)]
+    [Log(Title = "部门管理", BusinessType = OperLogConstants.BUSINESS_TYPE_INSERT)]
     public async Task<AjaxResult> Add([FromBody] CreateDeptDto dto)
     {
         try
@@ -96,7 +96,7 @@ public class SysDeptController : BaseController
     /// </summary>
     [HttpPut]
     [RequirePermission("system:dept:edit")]
-    [Log(Title = "部门管理", BusinessType = BusinessType.Update)]
+    [Log(Title = "部门管理", BusinessType = OperLogConstants.BUSINESS_TYPE_UPDATE)]
     public async Task<AjaxResult> Edit([FromBody] UpdateDeptDto dto)
     {
         try
@@ -115,7 +115,7 @@ public class SysDeptController : BaseController
     /// </summary>
     [HttpDelete("{deptId}")]
     [RequirePermission("system:dept:remove")]
-    [Log(Title = "部门管理", BusinessType = BusinessType.Delete)]
+    [Log(Title = "部门管理", BusinessType = OperLogConstants.BUSINESS_TYPE_DELETE)]
     public async Task<AjaxResult> Remove(long deptId)
     {
         try

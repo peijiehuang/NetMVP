@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NetMVP.Application.DTOs.OperLog;
 using NetMVP.Application.Services;
-using NetMVP.Domain.Enums;
+using NetMVP.Domain.Constants;
 using NetMVP.WebApi.Attributes;
 using System.Diagnostics;
 using System.Text.Json;
@@ -82,7 +82,7 @@ public class OperationLogFilter : IAsyncActionFilter
             BusinessType = logAttribute.BusinessType,
             Method = $"{context.ActionDescriptor.RouteValues["controller"]}.{context.ActionDescriptor.RouteValues["action"]}",
             RequestMethod = requestMethod,
-            OperatorType = OperatorType.BackendUser,
+            OperatorType = OperLogConstants.OPERATOR_TYPE_MANAGE,
             OperName = userName,
             OperUrl = operUrl,
             OperIp = ipAddress,
@@ -94,7 +94,7 @@ public class OperationLogFilter : IAsyncActionFilter
         // 判断操作是否成功
         if (executedContext.Exception != null)
         {
-            logDto.Status = CommonStatus.Failure;
+            logDto.Status = CommonConstants.FAIL;
             logDto.ErrorMsg = executedContext.Exception.Message;
             if (logDto.ErrorMsg.Length > 2000)
             {
@@ -103,7 +103,7 @@ public class OperationLogFilter : IAsyncActionFilter
         }
         else
         {
-            logDto.Status = CommonStatus.Success;
+            logDto.Status = CommonConstants.SUCCESS;
 
             // 保存响应结果
             if (logAttribute.IsSaveResponseData && executedContext.Result is ObjectResult objectResult)
