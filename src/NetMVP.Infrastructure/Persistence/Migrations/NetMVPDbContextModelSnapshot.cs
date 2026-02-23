@@ -44,13 +44,10 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("class_name");
 
                     b.Property<string>("CreateBy")
-                        .HasMaxLength(64)
-                        .HasColumnType("varchar(64)")
-                        .HasColumnName("create_by");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("CreateTime")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("create_time");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("FunctionAuthor")
                         .IsRequired()
@@ -76,9 +73,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(1)")
                         .HasColumnName("gen_type");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("ModuleName")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -97,9 +91,7 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("package_name");
 
                     b.Property<string>("Remark")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("remark");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SubTableFkName")
                         .HasMaxLength(64)
@@ -112,6 +104,7 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("sub_table_name");
 
                     b.Property<string>("TableComment")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
                         .HasColumnName("table_comment");
@@ -129,23 +122,19 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("tpl_category");
 
                     b.Property<string>("TplWebType")
-                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)")
                         .HasColumnName("tpl_web_type");
 
                     b.Property<string>("UpdateBy")
-                        .HasMaxLength(64)
-                        .HasColumnType("varchar(64)")
-                        .HasColumnName("update_by");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdateTime")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("update_time");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("TableId");
 
-                    b.ToTable("gen_table", (string)null);
+                    b.ToTable("gen_table");
                 });
 
             modelBuilder.Entity("NetMVP.Domain.Entities.GenTableColumn", b =>
@@ -164,7 +153,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("csharp_field");
 
                     b.Property<string>("CSharpType")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
                         .HasColumnName("csharp_type");
@@ -201,47 +189,43 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("dict_type");
 
                     b.Property<string>("HtmlType")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
                         .HasColumnName("html_type");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("IsEdit")
+                    b.Property<string>("IsEdit")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_edit");
 
-                    b.Property<int>("IsIncrement")
+                    b.Property<string>("IsIncrement")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_increment");
 
-                    b.Property<int>("IsInsert")
+                    b.Property<string>("IsInsert")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_insert");
 
-                    b.Property<int>("IsList")
+                    b.Property<string>("IsList")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_list");
 
-                    b.Property<int>("IsPk")
+                    b.Property<string>("IsPk")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_pk");
 
-                    b.Property<int>("IsQuery")
+                    b.Property<string>("IsQuery")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_query");
 
-                    b.Property<int>("IsRequired")
+                    b.Property<string>("IsRequired")
                         .HasMaxLength(1)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("is_required");
 
                     b.Property<string>("QueryType")
@@ -253,7 +237,7 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                     b.Property<string>("Remark")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("Sort")
+                    b.Property<int?>("Sort")
                         .HasColumnType("int")
                         .HasColumnName("sort");
 
@@ -271,8 +255,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("update_time");
 
                     b.HasKey("ColumnId");
-
-                    b.HasIndex("TableId");
 
                     b.ToTable("gen_table_column", (string)null);
                 });
@@ -298,10 +280,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("config_name");
 
-                    b.Property<int>("ConfigType")
+                    b.Property<string>("ConfigType")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(78)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("N")
                         .HasColumnName("config_type");
 
                     b.Property<string>("ConfigValue")
@@ -318,9 +302,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("CreateTime")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
-
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Remark")
                         .HasMaxLength(500)
@@ -368,10 +349,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
 
-                    b.Property<int>("DelFlag")
+                    b.Property<string>("DelFlag")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(48)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("del_flag");
 
                     b.Property<string>("DeptName")
@@ -384,9 +367,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("email");
-
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Leader")
                         .HasMaxLength(20)
@@ -410,15 +390,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(11)")
                         .HasColumnName("phone");
 
-                    b.Property<string>("Remark")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("remark");
-
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -480,13 +457,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("dict_value");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("IsDefault")
+                    b.Property<string>("IsDefault")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(78)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("N")
                         .HasColumnName("is_default");
 
                     b.Property<string>("ListClass")
@@ -499,10 +475,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("remark");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -549,18 +527,17 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("dict_type");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Remark")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
                         .HasColumnName("remark");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -589,8 +566,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("JobId"));
 
-                    b.Property<int>("Concurrent")
-                        .HasColumnType("int")
+                    b.Property<string>("Concurrent")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("1")
                         .HasColumnName("concurrent");
 
                     b.Property<string>("CreateBy")
@@ -608,18 +589,16 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("cron_expression");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("InvokeTarget")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
                         .HasColumnName("invoke_target");
 
-                    b.Property<int>("JobGroup")
+                    b.Property<string>("JobGroup")
+                        .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(64)")
                         .HasColumnName("job_group");
 
                     b.Property<string>("JobName")
@@ -628,8 +607,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(64)")
                         .HasColumnName("job_name");
 
-                    b.Property<int>("MisfirePolicy")
-                        .HasColumnType("int")
+                    b.Property<string>("MisfirePolicy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("3")
                         .HasColumnName("misfire_policy");
 
                     b.Property<string>("Remark")
@@ -637,8 +620,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("remark");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -664,7 +651,7 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("JobLogId"));
 
-                    b.Property<DateTime>("CreateTime")
+                    b.Property<DateTime?>("CreateTime")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
 
@@ -679,9 +666,10 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("invoke_target");
 
-                    b.Property<int>("JobGroup")
+                    b.Property<string>("JobGroup")
+                        .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("int")
+                        .HasColumnType("varchar(64)")
                         .HasColumnName("job_group");
 
                     b.Property<string>("JobMessage")
@@ -695,8 +683,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(64)")
                         .HasColumnName("job_name");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.HasKey("JobLogId");
@@ -729,7 +721,7 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("login_location");
 
-                    b.Property<DateTime>("LoginTime")
+                    b.Property<DateTime?>("LoginTime")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("login_time");
 
@@ -743,10 +735,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("os");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UserName")
@@ -792,15 +786,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("icon");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsCache")
-                        .HasColumnType("tinyint(1)")
+                    b.Property<int>("IsCache")
+                        .HasColumnType("int")
                         .HasColumnName("is_cache");
 
-                    b.Property<bool>("IsFrame")
-                        .HasColumnType("tinyint(1)")
+                    b.Property<int>("IsFrame")
+                        .HasColumnType("int")
                         .HasColumnName("is_frame");
 
                     b.Property<string>("MenuName")
@@ -809,8 +800,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("menu_name");
 
-                    b.Property<int>("MenuType")
-                        .HasColumnType("int")
+                    b.Property<string>("MenuType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("C")
                         .HasColumnName("menu_type");
 
                     b.Property<int>("OrderNum")
@@ -846,10 +841,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("route_name");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -861,10 +858,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("update_time");
 
-                    b.Property<int>("Visible")
+                    b.Property<string>("Visible")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("visible");
 
                     b.HasKey("MenuId");
@@ -890,9 +889,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<byte[]>("NoticeContent")
                         .HasColumnType("longblob")
                         .HasColumnName("notice_content");
@@ -903,8 +899,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("notice_title");
 
-                    b.Property<int>("NoticeType")
-                        .HasColumnType("int")
+                    b.Property<string>("NoticeType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("1")
                         .HasColumnName("notice_type");
 
                     b.Property<string>("Remark")
@@ -912,8 +912,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("remark");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -940,7 +944,10 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("OperId"));
 
                     b.Property<int>("BusinessType")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
                         .HasColumnType("int")
+                        .HasDefaultValue(0)
                         .HasColumnName("business_type");
 
                     b.Property<long>("CostTime")
@@ -987,7 +994,7 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(2000)")
                         .HasColumnName("oper_param");
 
-                    b.Property<DateTime>("OperTime")
+                    b.Property<DateTime?>("OperTime")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("oper_time");
 
@@ -997,7 +1004,10 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("oper_url");
 
                     b.Property<int>("OperatorType")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
                         .HasColumnType("int")
+                        .HasDefaultValue(0)
                         .HasColumnName("operator_type");
 
                     b.Property<string>("RequestMethod")
@@ -1006,7 +1016,10 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnName("request_method");
 
                     b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
                         .HasColumnType("int")
+                        .HasDefaultValue(0)
                         .HasColumnName("status");
 
                     b.Property<string>("Title")
@@ -1016,11 +1029,14 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
 
                     b.HasKey("OperId");
 
-                    b.HasIndex("BusinessType");
+                    b.HasIndex("BusinessType")
+                        .HasDatabaseName("idx_sys_oper_log_business_type");
 
-                    b.HasIndex("OperTime");
+                    b.HasIndex("OperTime")
+                        .HasDatabaseName("idx_sys_oper_log_oper_time");
 
-                    b.HasIndex("Status");
+                    b.HasIndex("Status")
+                        .HasDatabaseName("idx_sys_oper_log_status");
 
                     b.ToTable("sys_oper_log", (string)null);
                 });
@@ -1043,9 +1059,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
 
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("PostCode")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -1067,10 +1080,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("remark");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -1105,16 +1120,20 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
 
-                    b.Property<int>("DataScope")
+                    b.Property<string>("DataScope")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("1")
                         .HasColumnName("data_scope");
 
-                    b.Property<int>("DelFlag")
+                    b.Property<string>("DelFlag")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(48)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("del_flag");
 
                     b.Property<bool>("DeptCheckStrictly")
@@ -1122,9 +1141,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(true)
                         .HasColumnName("dept_check_strictly");
-
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
 
                     b.Property<bool>("MenuCheckStrictly")
                         .ValueGeneratedOnAdd()
@@ -1153,10 +1169,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("role_sort");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -1230,10 +1248,12 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("create_time");
 
-                    b.Property<int>("DelFlag")
+                    b.Property<string>("DelFlag")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(48)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("del_flag");
 
                     b.Property<long?>("DeptId")
@@ -1244,13 +1264,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("email");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("int")
-                        .HasColumnName("sex");
-
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("LoginDate")
                         .HasColumnType("datetime(6)")
@@ -1287,10 +1300,20 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("remark");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Sex")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("2")
+                        .HasColumnName("sex");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasDefaultValue("0")
                         .HasColumnName("status");
 
                     b.Property<string>("UpdateBy")
@@ -1401,17 +1424,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                     b.ToTable("sys_user_role", (string)null);
                 });
 
-            modelBuilder.Entity("NetMVP.Domain.Entities.GenTableColumn", b =>
-                {
-                    b.HasOne("NetMVP.Domain.Entities.GenTable", "Table")
-                        .WithMany("Columns")
-                        .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Table");
-                });
-
             modelBuilder.Entity("NetMVP.Domain.Entities.SysRoleDept", b =>
                 {
                     b.HasOne("NetMVP.Domain.Entities.SysDept", "Dept")
@@ -1486,11 +1498,6 @@ namespace NetMVP.Infrastructure.Persistence.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NetMVP.Domain.Entities.GenTable", b =>
-                {
-                    b.Navigation("Columns");
                 });
 
             modelBuilder.Entity("NetMVP.Domain.Entities.SysRole", b =>

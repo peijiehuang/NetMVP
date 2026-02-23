@@ -12,8 +12,8 @@ public class MenuDto
     public string? Path { get; set; }
     public string? Component { get; set; }
     public string? Query { get; set; }
-    public bool IsFrame { get; set; }
-    public bool IsCache { get; set; }
+    public string IsFrame { get; set; } = "1";
+    public string IsCache { get; set; } = "0";
     public string MenuType { get; set; } = string.Empty;
     public string Visible { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;

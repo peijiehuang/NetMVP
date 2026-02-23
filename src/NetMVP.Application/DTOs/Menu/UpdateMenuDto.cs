@@ -50,14 +50,14 @@ public class UpdateMenuDto
     public string? Query { get; set; }
 
     /// <summary>
-    /// 是否为外链
+    /// 是否为外链（0否 1是）
     /// </summary>
-    public bool IsFrame { get; set; } = false;
+    public string IsFrame { get; set; } = "1";
 
     /// <summary>
-    /// 是否缓存
+    /// 是否缓存（0缓存 1不缓存）
     /// </summary>
-    public bool IsCache { get; set; } = false;
+    public string IsCache { get; set; } = "0";
 
     /// <summary>
     /// 菜单类型

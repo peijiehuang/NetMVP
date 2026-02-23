@@ -96,8 +96,8 @@ public class SysMenuService : ISysMenuService
             Path = dto.Path,
             Component = dto.Component,
             Query = dto.Query,
-            IsFrame = dto.IsFrame,
-            IsCache = dto.IsCache,
+            IsFrame = int.TryParse(dto.IsFrame, out var isFrame) ? isFrame : 1,
+            IsCache = int.TryParse(dto.IsCache, out var isCache) ? isCache : 0,
             MenuType = dto.MenuType,
             Visible = dto.Visible,
             Status = dto.Status,
@@ -141,8 +141,8 @@ public class SysMenuService : ISysMenuService
         menu.Path = dto.Path;
         menu.Component = dto.Component;
         menu.Query = dto.Query;
-        menu.IsFrame = dto.IsFrame;
-        menu.IsCache = dto.IsCache;
+        menu.IsFrame = int.TryParse(dto.IsFrame, out var isFrame) ? isFrame : menu.IsFrame;
+        menu.IsCache = int.TryParse(dto.IsCache, out var isCache) ? isCache : menu.IsCache;
         menu.MenuType = dto.MenuType;
         menu.Visible = dto.Visible;
         menu.Status = dto.Status;
@@ -428,7 +428,7 @@ public class SysMenuService : ISysMenuService
                 {
                     Title = menu.MenuName,
                     Icon = menu.Icon,
-                    NoCache = !menu.IsCache,
+                    NoCache = menu.IsCache == "1", // 1=不缓存
                     Link = IsHttpLink(menu.Path) ? menu.Path : null // 只有http链接才设置link
                 }
             };
@@ -456,7 +456,7 @@ public class SysMenuService : ISysMenuService
                     {
                         Title = menu.MenuName,
                         Icon = menu.Icon,
-                        NoCache = !menu.IsCache,
+                        NoCache = menu.IsCache == "1", // 1=不缓存
                         Link = IsHttpLink(menu.Path) ? menu.Path : null
                     }
                 };
@@ -523,7 +523,7 @@ public class SysMenuService : ISysMenuService
             routerPath = "/";
         }
         // 非外链并且是一级目录（类型为目录，M=目录，is_frame=1）
-        else if (menu.ParentId == 0 && menu.MenuType == "M" && menu.IsFrame)
+        else if (menu.ParentId == 0 && menu.MenuType == "M" && menu.IsFrame == "1")
         {
             routerPath = "/" + menu.Path;
         }
@@ -541,7 +541,7 @@ public class SysMenuService : ISysMenuService
     /// </summary>
     private bool IsInnerLink(MenuDto menu)
     {
-        return menu.IsFrame && !string.IsNullOrEmpty(menu.Path) && 
+        return menu.IsFrame == "1" && !string.IsNullOrEmpty(menu.Path) && 
                (menu.Path.StartsWith("http://") || menu.Path.StartsWith("https://"));
     }
 
@@ -550,7 +550,7 @@ public class SysMenuService : ISysMenuService
     /// </summary>
     private bool IsMenuFrame(MenuDto menu)
     {
-        return menu.ParentId == 0 && menu.MenuType == "C" && menu.IsFrame;
+        return menu.ParentId == 0 && menu.MenuType == "C" && menu.IsFrame == "1";
     }
 
     /// <summary>

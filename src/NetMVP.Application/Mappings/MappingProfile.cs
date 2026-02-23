@@ -42,6 +42,8 @@ public class MappingProfile : Profile
 
         // 菜单映射
         CreateMap<SysMenu, MenuDto>()
+            .ForMember(dest => dest.IsFrame, opt => opt.MapFrom(src => src.IsFrame.ToString()))
+            .ForMember(dest => dest.IsCache, opt => opt.MapFrom(src => src.IsCache.ToString()))
             .ForMember(dest => dest.MenuType, opt => opt.MapFrom(src => 
                 src.MenuType == UserConstants.TYPE_DIR ? "M" : 
                 src.MenuType == UserConstants.TYPE_MENU ? "C" : "F"))

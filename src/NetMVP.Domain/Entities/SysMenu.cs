@@ -49,14 +49,14 @@ public class SysMenu : BaseEntity
     public string? RouteName { get; set; }
 
     /// <summary>
-    /// 是否为外链
+    /// 是否为外链（0是 1否）
     /// </summary>
-    public bool IsFrame { get; set; }
+    public int IsFrame { get; set; } = 1;
 
     /// <summary>
-    /// 是否缓存
+    /// 是否缓存（0缓存 1不缓存）
     /// </summary>
-    public bool IsCache { get; set; }
+    public int IsCache { get; set; } = 0;
 
     /// <summary>
     /// 菜单类型（M目录 C菜单 F按钮）

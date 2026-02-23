@@ -46,12 +46,12 @@ public class CreateMenuDto
     /// <summary>
     /// 是否为外链（0否 1是）
     /// </summary>
-    public bool IsFrame { get; set; } = false;
+    public string IsFrame { get; set; } = "1";
 
     /// <summary>
-    /// 是否缓存（0不缓存 1缓存）
+    /// 是否缓存（0缓存 1不缓存）
     /// </summary>
-    public bool IsCache { get; set; } = false;
+    public string IsCache { get; set; } = "0";
 
     /// <summary>
     /// 菜单类型（Directory目录 Menu菜单 Button按钮）
