@@ -3,15 +3,15 @@ using NetMVP.Infrastructure.Cache;
 
 namespace NetMVP.Infrastructure.Tests.Cache
 {
-    public class MemoryCacheManagerTests : IDisposable
+    public class CacheUtilTests : IDisposable
     {
         private readonly string _testDbPath;
 
-        public MemoryCacheManagerTests()
+        public CacheUtilTests()
         {
             _testDbPath = Path.Combine(Path.GetTempPath(), $"test_cache_{Guid.NewGuid()}.db");
             // 初始化静态缓存管理器
-            MemoryCacheManager.Initialize(new SqliteCachePersistence(_testDbPath));
+            CacheUtil.Initialize(new SqliteCachePersistence(_testDbPath));
         }
 
         [Fact]
@@ -22,17 +22,12 @@ namespace NetMVP.Infrastructure.Tests.Cache
             var value = new { Name = "Test", Age = 25 };
 
             // Act
-            var result = await MemoryCacheManager.SetAsync(key, value, persist: false);
+            var result = await CacheUtil.SetAsync(key, value, persist: false);
 
             // Assert
             result.Should().BeTrue();
-            var cached = await MemoryCacheManager.GetAsync<dynamic>(key, loadFromPersist: false);
-            cached.Should().NotBeNull();
-            if (cached != null)
-            {
-                // 验证缓存值存在
-                Assert.NotNull(cached);
-            }
+            var cached = await CacheUtil.GetAsync<dynamic>(key, loadFromPersist: false);
+            Assert.NotNull(cached);
         }
 
         [Fact]
@@ -43,11 +38,11 @@ namespace NetMVP.Infrastructure.Tests.Cache
             var value = "persistent value";
 
             // Act
-            await MemoryCacheManager.SetAsync(key, value, persist: true);
+            await CacheUtil.SetAsync(key, value, persist: true);
 
             // Assert - 清空内存后从持久化加载
-            await MemoryCacheManager.RemoveAsync(key, deleteFromPersist: false);
-            var loaded = await MemoryCacheManager.GetAsync<string>(key, loadFromPersist: true);
+            await CacheUtil.RemoveAsync(key, deleteFromPersist: false);
+            var loaded = await CacheUtil.GetAsync<string>(key, loadFromPersist: true);
             loaded.Should().Be(value);
         }
 
@@ -57,10 +52,10 @@ namespace NetMVP.Infrastructure.Tests.Cache
             // Arrange
             var key = $"get:test:{Guid.NewGuid()}";
             var value = new TestData { Id = 1, Name = "Test" };
-            await MemoryCacheManager.SetAsync(key, value, persist: false);
+            await CacheUtil.SetAsync(key, value, persist: false);
 
             // Act
-            var result = await MemoryCacheManager.GetAsync<TestData>(key, loadFromPersist: false);
+            var result = await CacheUtil.GetAsync<TestData>(key, loadFromPersist: false);
 
             // Assert
             result.Should().NotBeNull();
@@ -74,13 +69,13 @@ namespace NetMVP.Infrastructure.Tests.Cache
             // Arrange
             var key = $"load:test:{Guid.NewGuid()}";
             var value = "test value";
-            await MemoryCacheManager.SetAsync(key, value, persist: true);
+            await CacheUtil.SetAsync(key, value, persist: true);
             
             // Clear memory cache
-            await MemoryCacheManager.RemoveAsync(key, deleteFromPersist: false);
+            await CacheUtil.RemoveAsync(key, deleteFromPersist: false);
 
             // Act
-            var result = await MemoryCacheManager.GetAsync<string>(key, loadFromPersist: true);
+            var result = await CacheUtil.GetAsync<string>(key, loadFromPersist: true);
 
             // Assert
             result.Should().Be(value);
@@ -92,13 +87,13 @@ namespace NetMVP.Infrastructure.Tests.Cache
             // Arrange
             var key = $"expired:key:{Guid.NewGuid()}";
             var value = "expired value";
-            await MemoryCacheManager.SetAsync(key, value, TimeSpan.FromMilliseconds(100), persist: false);
+            await CacheUtil.SetAsync(key, value, TimeSpan.FromMilliseconds(100), persist: false);
             
             // Wait for expiration
             await Task.Delay(150);
 
             // Act
-            var result = await MemoryCacheManager.GetAsync<string>(key, loadFromPersist: false);
+            var result = await CacheUtil.GetAsync<string>(key, loadFromPersist: false);
 
             // Assert
             result.Should().BeNull();
@@ -109,14 +104,14 @@ namespace NetMVP.Infrastructure.Tests.Cache
         {
             // Arrange
             var key = $"remove:test:{Guid.NewGuid()}";
-            await MemoryCacheManager.SetAsync(key, "value", persist: false);
+            await CacheUtil.SetAsync(key, "value", persist: false);
 
             // Act
-            var removed = await MemoryCacheManager.RemoveAsync(key, deleteFromPersist: false);
+            var removed = await CacheUtil.RemoveAsync(key, deleteFromPersist: false);
 
             // Assert
             removed.Should().BeTrue();
-            var result = await MemoryCacheManager.GetAsync<string>(key, loadFromPersist: false);
+            var result = await CacheUtil.GetAsync<string>(key, loadFromPersist: false);
             result.Should().BeNull();
         }
 
@@ -125,10 +120,10 @@ namespace NetMVP.Infrastructure.Tests.Cache
         {
             // Arrange
             var key = $"exists:test:{Guid.NewGuid()}";
-            await MemoryCacheManager.SetAsync(key, "value", persist: false);
+            await CacheUtil.SetAsync(key, "value", persist: false);
 
             // Act
-            var exists = await MemoryCacheManager.ExistsAsync(key, checkPersist: false);
+            var exists = await CacheUtil.ExistsAsync(key, checkPersist: false);
 
             // Assert
             exists.Should().BeTrue();
@@ -138,7 +133,7 @@ namespace NetMVP.Infrastructure.Tests.Cache
         public async Task ExistsAsync_ShouldReturnFalseForNonExistingKey()
         {
             // Act
-            var exists = await MemoryCacheManager.ExistsAsync($"nonexistent:key:{Guid.NewGuid()}", checkPersist: false);
+            var exists = await CacheUtil.ExistsAsync($"nonexistent:key:{Guid.NewGuid()}", checkPersist: false);
 
             // Assert
             exists.Should().BeFalse();
@@ -151,17 +146,17 @@ namespace NetMVP.Infrastructure.Tests.Cache
             var validKey = $"valid:key:{Guid.NewGuid()}";
             var expiredKey = $"expired:key:{Guid.NewGuid()}";
             
-            await MemoryCacheManager.SetAsync(validKey, "valid", persist: false);
-            await MemoryCacheManager.SetAsync(expiredKey, "expired", TimeSpan.FromMilliseconds(100), persist: false);
+            await CacheUtil.SetAsync(validKey, "valid", persist: false);
+            await CacheUtil.SetAsync(expiredKey, "expired", TimeSpan.FromMilliseconds(100), persist: false);
             
             await Task.Delay(150);
 
             // Act
-            await MemoryCacheManager.CleanExpiredAsync(cleanPersist: false);
+            await CacheUtil.CleanExpiredAsync(cleanPersist: false);
 
             // Assert
-            var validExists = await MemoryCacheManager.ExistsAsync(validKey, checkPersist: false);
-            var expiredExists = await MemoryCacheManager.ExistsAsync(expiredKey, checkPersist: false);
+            var validExists = await CacheUtil.ExistsAsync(validKey, checkPersist: false);
+            var expiredExists = await CacheUtil.ExistsAsync(expiredKey, checkPersist: false);
             
             validExists.Should().BeTrue();
             expiredExists.Should().BeFalse();
@@ -174,19 +169,19 @@ namespace NetMVP.Infrastructure.Tests.Cache
             var key1 = $"load1:{Guid.NewGuid()}";
             var key2 = $"load2:{Guid.NewGuid()}";
             
-            await MemoryCacheManager.SetAsync(key1, "value1", persist: true);
-            await MemoryCacheManager.SetAsync(key2, "value2", persist: true);
+            await CacheUtil.SetAsync(key1, "value1", persist: true);
+            await CacheUtil.SetAsync(key2, "value2", persist: true);
             
             // Clear memory
-            await MemoryCacheManager.RemoveAsync(key1, deleteFromPersist: false);
-            await MemoryCacheManager.RemoveAsync(key2, deleteFromPersist: false);
+            await CacheUtil.RemoveAsync(key1, deleteFromPersist: false);
+            await CacheUtil.RemoveAsync(key2, deleteFromPersist: false);
 
             // Act
-            await MemoryCacheManager.LoadFromPersistAsync();
+            await CacheUtil.LoadFromPersistAsync();
 
             // Assert
-            var value1 = await MemoryCacheManager.GetAsync<string>(key1, loadFromPersist: false);
-            var value2 = await MemoryCacheManager.GetAsync<string>(key2, loadFromPersist: false);
+            var value1 = await CacheUtil.GetAsync<string>(key1, loadFromPersist: false);
+            var value2 = await CacheUtil.GetAsync<string>(key2, loadFromPersist: false);
             
             value1.Should().Be("value1");
             value2.Should().Be("value2");
@@ -201,13 +196,13 @@ namespace NetMVP.Infrastructure.Tests.Cache
             var createBy = "admin";
 
             // Act
-            await MemoryCacheManager.SetAsync(key, value, createBy: createBy, persist: true);
+            await CacheUtil.SetAsync(key, value, createBy: createBy, persist: true);
 
             // Assert - 从持久化加载验证
-            await MemoryCacheManager.RemoveAsync(key, deleteFromPersist: false);
-            await MemoryCacheManager.LoadFromPersistAsync();
+            await CacheUtil.RemoveAsync(key, deleteFromPersist: false);
+            await CacheUtil.LoadFromPersistAsync();
             
-            var result = await MemoryCacheManager.GetAsync<string>(key, loadFromPersist: false);
+            var result = await CacheUtil.GetAsync<string>(key, loadFromPersist: false);
             result.Should().Be(value);
         }
 
@@ -219,12 +214,12 @@ namespace NetMVP.Infrastructure.Tests.Cache
             var key2 = $"key2:{Guid.NewGuid()}";
             var key3 = $"key3:{Guid.NewGuid()}";
             
-            await MemoryCacheManager.SetAsync(key1, "value1", persist: false);
-            await MemoryCacheManager.SetAsync(key2, "value2", persist: false);
-            await MemoryCacheManager.SetAsync(key3, "value3", persist: false);
+            await CacheUtil.SetAsync(key1, "value1", persist: false);
+            await CacheUtil.SetAsync(key2, "value2", persist: false);
+            await CacheUtil.SetAsync(key3, "value3", persist: false);
 
             // Act
-            var keys = MemoryCacheManager.GetAllKeys();
+            var keys = CacheUtil.GetAllKeys();
 
             // Assert
             keys.Should().Contain(new[] { key1, key2, key3 });

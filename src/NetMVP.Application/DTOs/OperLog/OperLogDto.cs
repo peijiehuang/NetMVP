@@ -20,7 +20,7 @@ public class OperLogDto
     /// <summary>
     /// 业务类型
     /// </summary>
-    public string BusinessType { get; set; }
+    public string BusinessType { get; set; } = string.Empty;
 
     /// <summary>
     /// 方法名称
@@ -35,7 +35,7 @@ public class OperLogDto
     /// <summary>
     /// 操作类别
     /// </summary>
-    public string OperatorType { get; set; }
+    public string OperatorType { get; set; } = string.Empty;
 
     /// <summary>
     /// 操作人员
@@ -75,7 +75,7 @@ public class OperLogDto
     /// <summary>
     /// 操作状态
     /// </summary>
-    public string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
     /// <summary>
     /// 错误消息

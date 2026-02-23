@@ -34,7 +34,7 @@ public class CacheControllerTests : TestBase
     public async Task GetCacheNames_ShouldReturnNames()
     {
         _cacheMonitorServiceMock.Setup(x => x.GetCacheNamesAsync())
-            .ReturnsAsync(new List<string> { "cache1", "cache2" });
+            .ReturnsAsync(new List<CacheNameDto> { new CacheNameDto { CacheName = "cache1" }, new CacheNameDto { CacheName = "cache2" } });
 
         var result = await _controller.GetCacheNames();
 
@@ -47,7 +47,7 @@ public class CacheControllerTests : TestBase
     {
         var cacheName = "test-cache";
         _cacheMonitorServiceMock.Setup(x => x.GetCacheKeysAsync(It.IsAny<string>()))
-            .ReturnsAsync(new List<NetMVP.Domain.Interfaces.CacheKeyDto>());
+            .ReturnsAsync(new List<string>());
 
         var result = await _controller.GetCacheKeys(cacheName);
 
@@ -61,7 +61,7 @@ public class CacheControllerTests : TestBase
         var cacheName = "test-cache";
         var cacheKey = "test-key";
         _cacheMonitorServiceMock.Setup(x => x.GetCacheValueAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync("test-value");
+            .ReturnsAsync(new CacheValueDto { CacheName = cacheName, CacheKey = cacheKey, CacheValue = "test-value" });
 
         var result = await _controller.GetCacheValue(cacheName, cacheKey);
 

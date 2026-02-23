@@ -40,7 +40,7 @@ public class LoginInfoDto
     /// <summary>
     /// 登录状态
     /// </summary>
-    public string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
     /// <summary>
     /// 提示消息
