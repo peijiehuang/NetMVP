@@ -131,7 +131,7 @@ public class SysJobController : BaseController
     /// 导出任务
     /// </summary>
     [HttpPost("export")]
-    public async Task<IActionResult> Export([FromBody] JobQueryDto query)
+    public async Task<IActionResult> Export([FromForm] JobQueryDto query)
     {
         var data = await _jobService.ExportJobsAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "jobs.xlsx");

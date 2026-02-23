@@ -22,6 +22,7 @@ public class SysRoleServiceTests
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPermissionService> _permissionServiceMock;
     private readonly Mock<ISysMenuService> _menuServiceMock;
+    private readonly Mock<IExcelService> _excelServiceMock;
     private readonly IMapper _mapper;
     private readonly SysRoleService _roleService;
 
@@ -32,6 +33,7 @@ public class SysRoleServiceTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _permissionServiceMock = new Mock<IPermissionService>();
         _menuServiceMock = new Mock<ISysMenuService>();
+        _excelServiceMock = new Mock<IExcelService>();
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
         _mapper = config.CreateMapper();
@@ -42,7 +44,8 @@ public class SysRoleServiceTests
             _mapper,
             _unitOfWorkMock.Object,
             _permissionServiceMock.Object,
-            _menuServiceMock.Object
+            _menuServiceMock.Object,
+            _excelServiceMock.Object
         );
     }
 

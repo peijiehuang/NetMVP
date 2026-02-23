@@ -148,35 +148,17 @@ public class SysUserController : BaseController
     }
 
     /// <summary>
-    /// 删除用户
+    /// 删除用户（支持单个和批量）
     /// </summary>
-    [HttpDelete("{userId}")]
+    [HttpDelete("{userIds}")]
     [RequirePermission("system:user:remove")]
     [Log(Title = "用户管理", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> Remove(long userId)
+    public async Task<AjaxResult> Remove(string userIds)
     {
         try
         {
-            await _userService.DeleteUserAsync(userId);
-            return Success();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Error(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// 批量删除用户
-    /// </summary>
-    [HttpDelete]
-    [RequirePermission("system:user:remove")]
-    [Log(Title = "用户管理", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> RemoveBatch([FromBody] long[] userIds)
-    {
-        try
-        {
-            await _userService.DeleteUsersAsync(userIds);
+            var ids = userIds.Split(',').Select(long.Parse).ToArray();
+            await _userService.DeleteUsersAsync(ids);
             return Success();
         }
         catch (InvalidOperationException ex)
@@ -229,7 +211,7 @@ public class SysUserController : BaseController
     [HttpPost("export")]
     [RequirePermission("system:user:export")]
     [Log(Title = "用户管理", BusinessType = BusinessType.Export)]
-    public async Task<IActionResult> Export([FromBody] UserQueryDto query)
+    public async Task<IActionResult> Export([FromForm] UserQueryDto query)
     {
         var data = await _userService.ExportUsersAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"用户数据_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
@@ -329,5 +311,43 @@ public class SysUserController : BaseController
         {
             return Error(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// 导入用户数据
+    /// </summary>
+    [HttpPost("importData")]
+    [RequirePermission("system:user:import")]
+    [Log(Title = "用户管理", BusinessType = BusinessType.Import)]
+    public async Task<AjaxResult> ImportData(IFormFile file, [FromQuery] string updateSupport = "0")
+    {
+        try
+        {
+            if (file == null || file.Length == 0)
+            {
+                return Error("请选择要导入的文件");
+            }
+
+            // 将字符串转换为布尔值（兼容若依前端发送的"0"或"1"）
+            var isUpdateSupport = updateSupport == "1" || updateSupport.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+            using var stream = file.OpenReadStream();
+            var message = await _userService.ImportUsersAsync(stream, isUpdateSupport);
+            return Success(message);
+        }
+        catch (Exception ex)
+        {
+            return Error($"导入失败：{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 下载用户导入模板
+    /// </summary>
+    [HttpPost("importTemplate")]
+    public async Task<IActionResult> ImportTemplate()
+    {
+        var data = await _userService.GetImportTemplateAsync();
+        return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"用户导入模板_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
     }
 }

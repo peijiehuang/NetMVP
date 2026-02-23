@@ -99,35 +99,17 @@ public class SysDictDataController : BaseController
     }
 
     /// <summary>
-    /// 删除字典数据
+    /// 删除字典数据（支持单个和批量）
     /// </summary>
-    [HttpDelete("{dictCode}")]
+    [HttpDelete("{dictCodes}")]
     [RequirePermission("system:dict:remove")]
     [Log(Title = "字典数据", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> Remove(long dictCode)
+    public async Task<AjaxResult> Remove(string dictCodes)
     {
         try
         {
-            await _dictDataService.DeleteDictDataAsync(dictCode);
-            return Success();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Error(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// 批量删除字典数据
-    /// </summary>
-    [HttpDelete]
-    [RequirePermission("system:dict:remove")]
-    [Log(Title = "字典数据", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> RemoveBatch([FromBody] long[] dictCodes)
-    {
-        try
-        {
-            await _dictDataService.DeleteDictDataAsync(dictCodes);
+            var codes = dictCodes.Split(',').Select(long.Parse).ToArray();
+            await _dictDataService.DeleteDictDataAsync(codes);
             return Success();
         }
         catch (InvalidOperationException ex)
@@ -142,7 +124,7 @@ public class SysDictDataController : BaseController
     [HttpPost("export")]
     [RequirePermission("system:dict:export")]
     [Log(Title = "字典数据", BusinessType = BusinessType.Export)]
-    public async Task<IActionResult> Export([FromBody] DictDataQueryDto query)
+    public async Task<IActionResult> Export([FromForm] DictDataQueryDto query)
     {
         var data = await _dictDataService.ExportDictDataAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"字典数据_{DateTime.Now:yyyyMMddHHmmss}.xlsx");

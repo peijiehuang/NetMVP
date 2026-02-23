@@ -43,7 +43,7 @@ public class RouterDto
     /// <summary>
     /// 路由元信息
     /// </summary>
-    public RouterMetaDto Meta { get; set; } = new();
+    public RouterMetaDto? Meta { get; set; } = new();
 
     /// <summary>
     /// 子路由

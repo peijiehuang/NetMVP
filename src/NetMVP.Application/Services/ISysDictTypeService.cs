@@ -51,4 +51,9 @@ public interface ISysDictTypeService
     /// 检查字典类型唯一性
     /// </summary>
     Task<bool> CheckDictTypeUniqueAsync(string dictType, long? excludeDictId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取所有字典类型列表（用于下拉选择）
+    /// </summary>
+    Task<List<DictTypeDto>> GetAllDictTypesAsync(CancellationToken cancellationToken = default);
 }

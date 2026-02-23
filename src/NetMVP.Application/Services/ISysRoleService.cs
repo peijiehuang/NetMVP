@@ -72,4 +72,14 @@ public interface ISysRoleService
     /// 批量给用户授予角色
     /// </summary>
     Task InsertAuthUsersAsync(long roleId, long[] userIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取所有角色列表（用于下拉选择）
+    /// </summary>
+    Task<List<RoleDto>> GetAllRolesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 导出角色数据
+    /// </summary>
+    Task<byte[]> ExportRolesAsync(RoleQueryDto query, CancellationToken cancellationToken = default);
 }

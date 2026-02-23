@@ -251,4 +251,17 @@ public class SysPostService : ISysPostService
 
         return !await query.AnyAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// 获取所有岗位列表（用于下拉选择）
+    /// </summary>
+    public async Task<List<PostDto>> GetAllPostsAsync(CancellationToken cancellationToken = default)
+    {
+        var posts = await _postRepository.GetQueryable()
+            .Where(p => p.Status == UserStatus.Normal)
+            .OrderBy(p => p.PostSort)
+            .ToListAsync(cancellationToken);
+
+        return _mapper.Map<List<PostDto>>(posts);
+    }
 }

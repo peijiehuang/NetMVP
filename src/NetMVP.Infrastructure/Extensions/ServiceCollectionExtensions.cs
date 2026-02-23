@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -204,6 +205,28 @@ public static class ServiceCollectionExtensions
                     ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                     ClockSkew = TimeSpan.Zero
+                };
+
+                // 配置认证失败时的处理
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        // 阻止默认的401响应
+                        context.HandleResponse();
+
+                        // 设置HTTP状态码为200，但返回业务状态码401
+                        context.Response.StatusCode = 200;
+                        context.Response.ContentType = "application/json;charset=utf-8";
+
+                        var result = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            code = 401,
+                            msg = $"请求访问：{context.Request.Path}，认证失败，无法访问系统资源"
+                        });
+
+                        return context.Response.WriteAsync(result);
+                    }
                 };
             });
         }

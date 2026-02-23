@@ -69,7 +69,7 @@ public class SysLoginInfoController : BaseController
     /// </summary>
     [HttpPost("export")]
     [Log(Title = "登录日志", BusinessType = BusinessType.Export)]
-    public async Task<IActionResult> Export([FromBody] LoginInfoQueryDto query)
+    public async Task<IActionResult> Export([FromForm] LoginInfoQueryDto query)
     {
         var data = await _loginInfoService.ExportLoginInfosAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "登录日志.xlsx");

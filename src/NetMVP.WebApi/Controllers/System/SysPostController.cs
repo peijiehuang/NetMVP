@@ -89,35 +89,17 @@ public class SysPostController : BaseController
     }
 
     /// <summary>
-    /// 删除岗位
+    /// 删除岗位（支持单个和批量）
     /// </summary>
-    [HttpDelete("{postId}")]
+    [HttpDelete("{postIds}")]
     [RequirePermission("system:post:remove")]
     [Log(Title = "岗位管理", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> Remove(long postId)
+    public async Task<AjaxResult> Remove(string postIds)
     {
         try
         {
-            await _postService.DeletePostAsync(postId);
-            return Success();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Error(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// 批量删除岗位
-    /// </summary>
-    [HttpDelete]
-    [RequirePermission("system:post:remove")]
-    [Log(Title = "岗位管理", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> RemoveBatch([FromBody] long[] postIds)
-    {
-        try
-        {
-            await _postService.DeletePostsAsync(postIds);
+            var ids = postIds.Split(',').Select(long.Parse).ToArray();
+            await _postService.DeletePostsAsync(ids);
             return Success();
         }
         catch (InvalidOperationException ex)
@@ -132,10 +114,20 @@ public class SysPostController : BaseController
     [HttpPost("export")]
     [RequirePermission("system:post:export")]
     [Log(Title = "岗位管理", BusinessType = BusinessType.Export)]
-    public async Task<IActionResult> Export([FromBody] PostQueryDto query)
+    public async Task<IActionResult> Export([FromForm] PostQueryDto query)
     {
         var data = await _postService.ExportPostsAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"岗位数据_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+    }
+
+    /// <summary>
+    /// 获取岗位选择框列表
+    /// </summary>
+    [HttpGet("optionselect")]
+    public async Task<AjaxResult> OptionSelect()
+    {
+        var posts = await _postService.GetAllPostsAsync();
+        return Success(posts);
     }
 
     /// <summary>

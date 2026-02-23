@@ -56,7 +56,7 @@ public class SysOperLogController : ControllerBase
     /// 导出操作日志
     /// </summary>
     [HttpPost("export")]
-    public async Task<IActionResult> Export([FromBody] OperLogQueryDto query)
+    public async Task<IActionResult> Export([FromForm] OperLogQueryDto query)
     {
         var data = await _operLogService.ExportOperLogsAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "操作日志.xlsx");

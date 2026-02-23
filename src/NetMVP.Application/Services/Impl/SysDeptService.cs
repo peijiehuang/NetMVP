@@ -359,4 +359,40 @@ public class SysDeptService : ISysDeptService
             .Select(rd => rd.DeptId)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// 获取部门列表（排除指定节点及其子节点）
+    /// </summary>
+    public async Task<List<DeptDto>> GetDeptListExcludeChildAsync(long deptId, CancellationToken cancellationToken = default)
+    {
+        var allDepts = await _deptRepository.GetQueryable()
+            .OrderBy(d => d.ParentId)
+            .ThenBy(d => d.OrderNum)
+            .ToListAsync(cancellationToken);
+
+        var deptDtos = _mapper.Map<List<DeptDto>>(allDepts);
+
+        // 获取要排除的部门
+        var excludeDept = deptDtos.FirstOrDefault(d => d.DeptId == deptId);
+        if (excludeDept == null)
+        {
+            return deptDtos;
+        }
+
+        // 排除指定部门及其所有子部门
+        var excludeIds = new HashSet<long> { deptId };
+        var ancestors = excludeDept.Ancestors ?? "";
+        
+        // 找出所有子部门（ancestors包含当前deptId的）
+        foreach (var dept in deptDtos)
+        {
+            if (dept.Ancestors != null && dept.Ancestors.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Any(a => long.TryParse(a, out var ancestorId) && ancestorId == deptId))
+            {
+                excludeIds.Add(dept.DeptId);
+            }
+        }
+
+        return deptDtos.Where(d => !excludeIds.Contains(d.DeptId)).ToList();
+    }
 }

@@ -18,6 +18,7 @@ public class SysRoleService : ISysRoleService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPermissionService _permissionService;
     private readonly ISysMenuService _menuService;
+    private readonly IExcelService _excelService;
 
     public SysRoleService(
         IRepository<SysRole> roleRepository,
@@ -25,7 +26,8 @@ public class SysRoleService : ISysRoleService
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IPermissionService permissionService,
-        ISysMenuService menuService)
+        ISysMenuService menuService,
+        IExcelService excelService)
     {
         _roleRepository = roleRepository;
         _userRepository = userRepository;
@@ -33,6 +35,7 @@ public class SysRoleService : ISysRoleService
         _unitOfWork = unitOfWork;
         _permissionService = permissionService;
         _menuService = menuService;
+        _excelService = excelService;
     }
 
     /// <summary>
@@ -553,5 +556,83 @@ public class SysRoleService : ISysRoleService
                 await _permissionService.ClearUserPermissionCacheAsync(userId);
             }
         }
+    }
+
+    /// <summary>
+    /// 获取所有角色列表（用于下拉选择）
+    /// </summary>
+    public async Task<List<RoleDto>> GetAllRolesAsync(CancellationToken cancellationToken = default)
+    {
+        var roles = await _roleRepository.GetQueryable()
+            .Where(r => r.Status == UserStatus.Normal)
+            .OrderBy(r => r.RoleSort)
+            .ToListAsync(cancellationToken);
+
+        return _mapper.Map<List<RoleDto>>(roles);
+    }
+
+    /// <summary>
+    /// 导出角色数据
+    /// </summary>
+    public async Task<byte[]> ExportRolesAsync(RoleQueryDto query, CancellationToken cancellationToken = default)
+    {
+        // 获取所有数据（不分页）
+        var queryable = _roleRepository.GetQueryable();
+
+        // 角色名称
+        if (!string.IsNullOrWhiteSpace(query.RoleName))
+        {
+            queryable = queryable.Where(r => r.RoleName.Contains(query.RoleName));
+        }
+
+        // 角色权限
+        if (!string.IsNullOrWhiteSpace(query.RoleKey))
+        {
+            queryable = queryable.Where(r => r.RoleKey.Contains(query.RoleKey));
+        }
+
+        // 状态
+        if (!string.IsNullOrWhiteSpace(query.Status))
+        {
+            if (Enum.TryParse<UserStatus>(query.Status, out var status))
+                queryable = queryable.Where(r => r.Status == status);
+        }
+
+        var roles = await queryable
+            .OrderBy(r => r.RoleSort)
+            .ToListAsync(cancellationToken);
+
+        var roleDtos = _mapper.Map<List<RoleDto>>(roles);
+
+        // 转换为导出DTO（带中文列头）
+        var exportDtos = roleDtos.Select(r => new ExportRoleDto
+        {
+            RoleId = r.RoleId,
+            RoleName = r.RoleName,
+            RoleKey = r.RoleKey,
+            RoleSort = r.RoleSort,
+            DataScope = r.DataScope switch
+            {
+                "1" => "全部数据权限",
+                "2" => "自定数据权限",
+                "3" => "本部门数据权限",
+                "4" => "本部门及以下数据权限",
+                "5" => "仅本人数据权限",
+                _ => r.DataScope
+            },
+            Status = r.Status switch
+            {
+                "0" => "正常",
+                "1" => "停用",
+                _ => r.Status
+            },
+            CreateTime = r.CreateTime,
+            Remark = r.Remark
+        }).ToList();
+
+        // 导出到内存流
+        using var stream = new MemoryStream();
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
+        return stream.ToArray();
     }
 }

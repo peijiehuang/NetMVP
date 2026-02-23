@@ -56,4 +56,9 @@ public interface ISysDeptService
     /// 获取角色已选部门ID列表
     /// </summary>
     Task<List<long>> GetDeptIdsByRoleIdAsync(long roleId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取部门列表（排除指定节点及其子节点）
+    /// </summary>
+    Task<List<DeptDto>> GetDeptListExcludeChildAsync(long deptId, CancellationToken cancellationToken = default);
 }

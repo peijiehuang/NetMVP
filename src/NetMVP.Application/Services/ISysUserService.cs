@@ -112,4 +112,14 @@ public interface ISysUserService
     /// 获取未分配该角色的用户列表
     /// </summary>
     Task<(List<UserDto> users, int total)> GetUnallocatedUserListAsync(long roleId, string? userName, string? phonenumber, int pageNum, int pageSize, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 导入用户数据
+    /// </summary>
+    Task<string> ImportUsersAsync(Stream fileStream, bool updateSupport, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 下载用户导入模板
+    /// </summary>
+    Task<byte[]> GetImportTemplateAsync(CancellationToken cancellationToken = default);
 }

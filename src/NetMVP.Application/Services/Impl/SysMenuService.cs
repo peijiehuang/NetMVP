@@ -449,8 +449,8 @@ public class SysMenuService : ISysMenuService
                 router.Meta = null; // 父路由不需要meta
                 var children = new RouterDto
                 {
-                    Path = menu.Path,
-                    Component = menu.Component,
+                    Path = menu.Path ?? string.Empty,
+                    Component = menu.Component ?? string.Empty,
                     Name = GetRouteName(menu),
                     Query = menu.Query,
                     Meta = new RouterMetaDto
@@ -474,7 +474,7 @@ public class SysMenuService : ISysMenuService
                 router.Path = "/";
                 var children = new RouterDto
                 {
-                    Path = menu.Path, // 保持原始http路径
+                    Path = menu.Path ?? string.Empty, // 保持原始http路径
                     Component = "InnerLink",
                     Name = GetRouteName(menu),
                     Meta = new RouterMetaDto

@@ -80,7 +80,7 @@ public class SysJobLogController : BaseController
     /// 导出任务日志
     /// </summary>
     [HttpPost("export")]
-    public async Task<IActionResult> Export([FromBody] JobLogQueryDto query)
+    public async Task<IActionResult> Export([FromForm] JobLogQueryDto query)
     {
         var data = await _jobLogService.ExportJobLogsAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "job_logs.xlsx");

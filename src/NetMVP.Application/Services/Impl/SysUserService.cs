@@ -529,9 +529,34 @@ public class SysUserService : ISysUserService
             }
         }
 
+        // 转换为导出DTO（带中文列头）
+        var exportDtos = userDtos.Select(u => new ExportUserDto
+        {
+            UserId = u.UserId,
+            UserName = u.UserName,
+            NickName = u.NickName,
+            Email = u.Email,
+            Phonenumber = u.Phonenumber,
+            Sex = u.Sex switch
+            {
+                "0" => "男",
+                "1" => "女",
+                "2" => "未知",
+                _ => u.Sex
+            },
+            Status = u.Status switch
+            {
+                "0" => "正常",
+                "1" => "停用",
+                _ => u.Status
+            },
+            DeptName = u.Dept?.DeptName,
+            CreateTime = u.CreateTime
+        }).ToList();
+
         // 导出到内存流
         using var stream = new MemoryStream();
-        await _excelService.ExportAsync(userDtos, stream, cancellationToken);
+        await _excelService.ExportAsync(exportDtos, stream, cancellationToken);
         return stream.ToArray();
     }
 
@@ -865,4 +890,176 @@ public class SysUserService : ISysUserService
 
         return (userDtos, total);
     }
+
+    /// <summary>
+    /// 导入用户数据
+    /// </summary>
+    public async Task<string> ImportUsersAsync(Stream fileStream, bool updateSupport, CancellationToken cancellationToken = default)
+    {
+        // 从Excel读取用户数据
+        var importUsers = await _excelService.ImportAsync<ImportUserDto>(fileStream, cancellationToken);
+        
+        if (importUsers == null || importUsers.Count == 0)
+        {
+            throw new InvalidOperationException("导入数据不能为空");
+        }
+
+        int successNum = 0;
+        int failureNum = 0;
+        var failureMessages = new List<string>();
+        var currentUserName = _currentUserService.GetUserName();
+
+        foreach (var importUser in importUsers)
+        {
+            try
+            {
+                // 验证必填字段
+                if (string.IsNullOrWhiteSpace(importUser.UserName))
+                {
+                    failureNum++;
+                    failureMessages.Add($"第{importUsers.IndexOf(importUser) + 1}行：用户名不能为空");
+                    continue;
+                }
+
+                // 转换性别和状态
+                var gender = ParseGender(importUser.Gender);
+                var status = ParseUserStatus(importUser.Status);
+
+                // 检查用户是否存在
+                var existingUser = await _userRepository.GetByUserNameAsync(importUser.UserName, cancellationToken);
+
+                if (existingUser != null)
+                {
+                    if (!updateSupport)
+                    {
+                        failureNum++;
+                        failureMessages.Add($"用户'{importUser.UserName}'已存在");
+                        continue;
+                    }
+
+                    // 更新用户
+                    existingUser.NickName = importUser.NickName ?? existingUser.NickName;
+                    existingUser.EmailValue = !string.IsNullOrWhiteSpace(importUser.Email) 
+                        ? importUser.Email 
+                        : existingUser.EmailValue;
+                    existingUser.PhoneNumberValue = !string.IsNullOrWhiteSpace(importUser.PhoneNumber) 
+                        ? importUser.PhoneNumber 
+                        : existingUser.PhoneNumberValue;
+                    existingUser.Gender = gender ?? existingUser.Gender;
+                    existingUser.Status = status ?? existingUser.Status;
+                    existingUser.UpdateBy = currentUserName;
+                    existingUser.UpdateTime = DateTime.Now;
+
+                    await _userRepository.UpdateAsync(existingUser, cancellationToken);
+                    successNum++;
+                }
+                else
+                {
+                    // 新增用户
+                    var newUser = new SysUser
+                    {
+                        UserName = importUser.UserName,
+                        NickName = importUser.NickName ?? importUser.UserName,
+                        EmailValue = importUser.Email,
+                        PhoneNumberValue = importUser.PhoneNumber,
+                        Gender = gender ?? Gender.Unknown,
+                        Status = status ?? UserStatus.Normal,
+                        Password = BCrypt.Net.BCrypt.HashPassword("123456"), // 默认密码
+                        DeptId = importUser.DeptId ?? 100, // 默认部门
+                        CreateBy = currentUserName,
+                        CreateTime = DateTime.Now
+                    };
+
+                    await _userRepository.AddAsync(newUser, cancellationToken);
+                    successNum++;
+                }
+            }
+            catch (Exception ex)
+            {
+                failureNum++;
+                failureMessages.Add($"用户'{importUser.UserName}'导入失败：{ex.Message}");
+            }
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var message = $"导入完成！成功 {successNum} 条，失败 {failureNum} 条";
+        if (failureMessages.Any())
+        {
+            message += "。失败信息：" + string.Join("；", failureMessages.Take(10));
+            if (failureMessages.Count > 10)
+            {
+                message += $"...等{failureMessages.Count}条";
+            }
+        }
+
+        return message;
+    }
+
+    /// <summary>
+    /// 下载用户导入模板
+    /// </summary>
+    public async Task<byte[]> GetImportTemplateAsync(CancellationToken cancellationToken = default)
+    {
+        // 创建模板数据（示例数据）
+        var templateData = new List<ImportUserDto>
+        {
+            new ImportUserDto
+            {
+                UserName = "示例用户",
+                NickName = "示例昵称",
+                Email = "example@example.com",
+                PhoneNumber = "13800138000",
+                Gender = "男",
+                Status = "正常",
+                DeptId = 100
+            }
+        };
+
+        using var stream = new MemoryStream();
+        await _excelService.ExportAsync(templateData, stream, cancellationToken);
+        return stream.ToArray();
+    }
+
+    #region 辅助方法
+
+    /// <summary>
+    /// 解析性别字符串
+    /// </summary>
+    private Gender? ParseGender(string? genderStr)
+    {
+        if (string.IsNullOrWhiteSpace(genderStr))
+            return null;
+
+        return genderStr switch
+        {
+            "男" => Gender.Male,
+            "女" => Gender.Female,
+            "未知" => Gender.Unknown,
+            "0" => Gender.Male,
+            "1" => Gender.Female,
+            "2" => Gender.Unknown,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// 解析用户状态字符串
+    /// </summary>
+    private UserStatus? ParseUserStatus(string? statusStr)
+    {
+        if (string.IsNullOrWhiteSpace(statusStr))
+            return null;
+
+        return statusStr switch
+        {
+            "正常" => UserStatus.Normal,
+            "停用" => UserStatus.Disabled,
+            "0" => UserStatus.Normal,
+            "1" => UserStatus.Disabled,
+            _ => null
+        };
+    }
+
+    #endregion
 }

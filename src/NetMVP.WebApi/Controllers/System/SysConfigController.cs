@@ -123,7 +123,7 @@ public class SysConfigController : ControllerBase
     /// </summary>
     [HttpPost("export")]
     [Log(Title = "参数管理", BusinessType = BusinessType.Export)]
-    public async Task<IActionResult> Export([FromBody] ConfigQueryDto query)
+    public async Task<IActionResult> Export([FromForm] ConfigQueryDto query)
     {
         var data = await _configService.ExportConfigsAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"参数配置_{DateTime.Now:yyyyMMddHHmmss}.xlsx");

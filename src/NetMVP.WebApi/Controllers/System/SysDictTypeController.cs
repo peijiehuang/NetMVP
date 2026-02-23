@@ -89,35 +89,17 @@ public class SysDictTypeController : BaseController
     }
 
     /// <summary>
-    /// 删除字典类型
+    /// 删除字典类型（支持单个和批量）
     /// </summary>
-    [HttpDelete("{dictId}")]
+    [HttpDelete("{dictIds}")]
     [RequirePermission("system:dict:remove")]
     [Log(Title = "字典类型", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> Remove(long dictId)
+    public async Task<AjaxResult> Remove(string dictIds)
     {
         try
         {
-            await _dictTypeService.DeleteDictTypeAsync(dictId);
-            return Success();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Error(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// 批量删除字典类型
-    /// </summary>
-    [HttpDelete]
-    [RequirePermission("system:dict:remove")]
-    [Log(Title = "字典类型", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> RemoveBatch([FromBody] long[] dictIds)
-    {
-        try
-        {
-            await _dictTypeService.DeleteDictTypesAsync(dictIds);
+            var ids = dictIds.Split(',').Select(long.Parse).ToArray();
+            await _dictTypeService.DeleteDictTypesAsync(ids);
             return Success();
         }
         catch (InvalidOperationException ex)
@@ -144,10 +126,20 @@ public class SysDictTypeController : BaseController
     [HttpPost("export")]
     [RequirePermission("system:dict:export")]
     [Log(Title = "字典类型", BusinessType = BusinessType.Export)]
-    public async Task<IActionResult> Export([FromBody] DictTypeQueryDto query)
+    public async Task<IActionResult> Export([FromForm] DictTypeQueryDto query)
     {
         var data = await _dictTypeService.ExportDictTypesAsync(query);
         return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"字典类型_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+    }
+
+    /// <summary>
+    /// 获取字典选择框列表
+    /// </summary>
+    [HttpGet("optionselect")]
+    public async Task<AjaxResult> OptionSelect()
+    {
+        var dictTypes = await _dictTypeService.GetAllDictTypesAsync();
+        return Success(dictTypes);
     }
 
     /// <summary>

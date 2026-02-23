@@ -35,6 +35,17 @@ public class SysDeptController : BaseController
     }
 
     /// <summary>
+    /// 查询部门列表（排除节点）
+    /// </summary>
+    [HttpGet("list/exclude/{deptId}")]
+    [RequirePermission("system:dept:list")]
+    public async Task<AjaxResult> ExcludeChild(long deptId)
+    {
+        var depts = await _deptService.GetDeptListExcludeChildAsync(deptId);
+        return Success(depts);
+    }
+
+    /// <summary>
     /// 获取部门树
     /// </summary>
     [HttpGet("tree")]

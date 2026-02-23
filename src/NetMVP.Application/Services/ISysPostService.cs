@@ -51,4 +51,9 @@ public interface ISysPostService
     /// 检查岗位编码唯一性
     /// </summary>
     Task<bool> CheckPostCodeUniqueAsync(string postCode, long? excludePostId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 获取所有岗位列表（用于下拉选择）
+    /// </summary>
+    Task<List<PostDto>> GetAllPostsAsync(CancellationToken cancellationToken = default);
 }

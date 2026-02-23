@@ -240,4 +240,17 @@ public class SysDictTypeService : ISysDictTypeService
 
         return !await query.AnyAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// 获取所有字典类型列表（用于下拉选择）
+    /// </summary>
+    public async Task<List<DictTypeDto>> GetAllDictTypesAsync(CancellationToken cancellationToken = default)
+    {
+        var dictTypes = await _dictTypeRepository.GetQueryable()
+            .Where(d => d.Status == UserStatus.Normal)
+            .OrderBy(d => d.DictId)
+            .ToListAsync(cancellationToken);
+
+        return _mapper.Map<List<DictTypeDto>>(dictTypes);
+    }
 }

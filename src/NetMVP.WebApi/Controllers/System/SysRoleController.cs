@@ -96,35 +96,17 @@ public class SysRoleController : BaseController
     }
 
     /// <summary>
-    /// 删除角色
+    /// 删除角色（支持单个和批量）
     /// </summary>
-    [HttpDelete("{roleId}")]
+    [HttpDelete("{roleIds}")]
     [RequirePermission("system:role:remove")]
     [Log(Title = "角色管理", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> Remove(long roleId)
+    public async Task<AjaxResult> Remove(string roleIds)
     {
         try
         {
-            await _roleService.DeleteRoleAsync(roleId);
-            return Success();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Error(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// 批量删除角色
-    /// </summary>
-    [HttpDelete]
-    [RequirePermission("system:role:remove")]
-    [Log(Title = "角色管理", BusinessType = BusinessType.Delete)]
-    public async Task<AjaxResult> RemoveBatch([FromBody] long[] roleIds)
-    {
-        try
-        {
-            await _roleService.DeleteRolesAsync(roleIds);
+            var ids = roleIds.Split(',').Select(long.Parse).ToArray();
+            await _roleService.DeleteRolesAsync(ids);
             return Success();
         }
         catch (InvalidOperationException ex)
@@ -150,6 +132,17 @@ public class SysRoleController : BaseController
         {
             return Error(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// 获取角色选择框列表
+    /// </summary>
+    [HttpGet("optionselect")]
+    [RequirePermission("system:role:query")]
+    public async Task<AjaxResult> OptionSelect()
+    {
+        var roles = await _roleService.GetAllRolesAsync();
+        return Success(roles);
     }
 
     /// <summary>
@@ -283,6 +276,18 @@ public class SysRoleController : BaseController
         {
             return Error(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// 导出角色数据
+    /// </summary>
+    [HttpPost("export")]
+    [RequirePermission("system:role:export")]
+    [Log(Title = "角色管理", BusinessType = BusinessType.Export)]
+    public async Task<IActionResult> Export([FromForm] RoleQueryDto query)
+    {
+        var data = await _roleService.ExportRolesAsync(query);
+        return File(data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"角色数据_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
     }
 }
 
