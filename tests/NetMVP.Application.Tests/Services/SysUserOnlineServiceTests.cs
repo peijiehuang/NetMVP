@@ -70,11 +70,11 @@ public class SysUserOnlineServiceTests
         _cacheServiceMock.Setup(x => x.GetKeysAsync("online_user:*", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<string> { "online_user:token1", "online_user:token2" });
         
-        _cacheServiceMock.Setup(x => x.GetAsync<string>("online_user:token1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(JsonSerializer.Serialize(onlineUser1));
+        _cacheServiceMock.Setup(x => x.GetAsync<OnlineUserDto>("online_user:token1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(onlineUser1);
         
-        _cacheServiceMock.Setup(x => x.GetAsync<string>("online_user:token2", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(JsonSerializer.Serialize(onlineUser2));
+        _cacheServiceMock.Setup(x => x.GetAsync<OnlineUserDto>("online_user:token2", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(onlineUser2);
 
         // Act
         var (users, total) = await _service.GetOnlineUserListAsync(query);
@@ -86,23 +86,34 @@ public class SysUserOnlineServiceTests
     }
 
     [Fact]
-    public async Task ForceLogoutAsync_ShouldAddTokenToBlacklistAndRemoveOnlineUser()
+    public async Task ForceLogoutAsync_ShouldRemoveOnlineUser()
     {
         // Arrange
         var tokenId = "test-token-id";
+        var onlineUser = new OnlineUserDto
+        {
+            TokenId = tokenId,
+            UserId = 1,
+            UserName = "admin",
+            Ipaddr = "127.0.0.1",
+            LoginTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+        };
+
+        _cacheServiceMock.Setup(x => x.GetAsync<OnlineUserDto>(
+            $"online_user:{tokenId}",
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(onlineUser);
 
         // Act
         await _service.ForceLogoutAsync(tokenId);
 
         // Assert
-        _cacheServiceMock.Verify(x => x.SetAsync(
-            $"token_blacklist:{tokenId}",
-            "revoked",
-            TimeSpan.FromHours(24),
+        _cacheServiceMock.Verify(x => x.RemoveAsync(
+            $"online_user:{tokenId}",
             It.IsAny<CancellationToken>()), Times.Once);
 
         _cacheServiceMock.Verify(x => x.RemoveAsync(
-            $"online_user:{tokenId}",
+            $"user_session:{onlineUser.UserId}",
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -111,6 +122,23 @@ public class SysUserOnlineServiceTests
     {
         // Arrange
         var tokenIds = new[] { "token1", "token2", "token3" };
+        
+        foreach (var tokenId in tokenIds)
+        {
+            var onlineUser = new OnlineUserDto
+            {
+                TokenId = tokenId,
+                UserId = long.Parse(tokenId.Replace("token", "")),
+                UserName = $"user{tokenId}",
+                Ipaddr = "127.0.0.1",
+                LoginTime = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+
+            _cacheServiceMock.Setup(x => x.GetAsync<OnlineUserDto>(
+                $"online_user:{tokenId}",
+                It.IsAny<CancellationToken>()))
+                .ReturnsAsync(onlineUser);
+        }
 
         // Act
         await _service.BatchForceLogoutAsync(tokenIds);
@@ -118,12 +146,6 @@ public class SysUserOnlineServiceTests
         // Assert
         foreach (var tokenId in tokenIds)
         {
-            _cacheServiceMock.Verify(x => x.SetAsync(
-                $"token_blacklist:{tokenId}",
-                "revoked",
-                TimeSpan.FromHours(24),
-                It.IsAny<CancellationToken>()), Times.Once);
-
             _cacheServiceMock.Verify(x => x.RemoveAsync(
                 $"online_user:{tokenId}",
                 It.IsAny<CancellationToken>()), Times.Once);

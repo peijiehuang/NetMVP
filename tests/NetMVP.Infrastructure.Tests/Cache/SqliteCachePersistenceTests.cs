@@ -224,27 +224,73 @@ namespace NetMVP.Infrastructure.Tests.Cache
         {
             // Arrange
             var nestedPath = Path.Combine(Path.GetTempPath(), $"test_nested_{Guid.NewGuid()}", "cache.db");
+            string? directory = null;
 
-            // Act
-            using var persistence = new SqliteCachePersistence(nestedPath);
-
-            // Assert
-            File.Exists(nestedPath).Should().BeTrue();
-
-            // Cleanup
-            var directory = Path.GetDirectoryName(nestedPath);
-            if (directory != null && Directory.Exists(directory))
+            try
             {
-                Directory.Delete(directory, true);
+                // Act
+                using (var persistence = new SqliteCachePersistence(nestedPath))
+                {
+                    // Assert
+                    File.Exists(nestedPath).Should().BeTrue();
+                    directory = Path.GetDirectoryName(nestedPath);
+                }
+
+                // 等待文件句柄完全释放
+                System.Threading.Thread.Sleep(200);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+            finally
+            {
+                // Cleanup - 尽力清理，但不影响测试结果
+                if (directory != null && Directory.Exists(directory))
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        try
+                        {
+                            Directory.Delete(directory, true);
+                            break;
+                        }
+                        catch (IOException)
+                        {
+                            if (i < 2)
+                            {
+                                System.Threading.Thread.Sleep(100);
+                                GC.Collect();
+                                GC.WaitForPendingFinalizers();
+                            }
+                            // 最后一次失败也忽略，不影响测试结果
+                        }
+                    }
+                }
             }
         }
 
         public void Dispose()
         {
             _persistence?.Dispose();
+            
+            // 等待一小段时间确保文件句柄被释放
+            System.Threading.Thread.Sleep(100);
+            
+            // 尝试删除文件，如果失败则忽略（测试环境清理问题）
             if (File.Exists(_testDbPath))
             {
-                File.Delete(_testDbPath);
+                try
+                {
+                    // 强制垃圾回收，释放可能的文件句柄
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    
+                    File.Delete(_testDbPath);
+                }
+                catch (IOException)
+                {
+                    // 文件被占用，忽略错误（测试环境问题，不影响测试结果）
+                }
             }
         }
     }
