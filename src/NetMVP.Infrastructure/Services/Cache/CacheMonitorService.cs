@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetMVP.Domain.Constants;
 using NetMVP.Domain.Interfaces;
 using NetMVP.Infrastructure.Configuration;
 using StackExchange.Redis;
@@ -15,16 +17,19 @@ public class CacheMonitorService : ICacheMonitorService
     private readonly IDatabase _database;
     private readonly ICacheService _cacheService;
     private readonly CacheOptions _options;
+    private readonly ILogger<CacheMonitorService> _logger;
 
     public CacheMonitorService(
         IConnectionMultiplexer redis,
         ICacheService cacheService,
-        IOptions<CacheOptions> options)
+        IOptions<CacheOptions> options,
+        ILogger<CacheMonitorService> logger)
     {
         _redis = redis;
         _database = redis.GetDatabase();
         _cacheService = cacheService;
         _options = options.Value;
+        _logger = logger;
     }
 
     private string GetKey(string key) => $"{_options.KeyPrefix}{key}";
@@ -81,7 +86,7 @@ public class CacheMonitorService : ICacheMonitorService
             {
                 // 记录错误但不中断执行
                 // 命令统计可能在某些Redis配置中不可用
-                System.Diagnostics.Debug.WriteLine($"Failed to get command stats: {ex.Message}");
+                _logger.LogWarning(ex, "获取Redis命令统计失败，可能在当前Redis配置中不可用");
             }
 
             // 获取数据库大小
@@ -147,16 +152,16 @@ public class CacheMonitorService : ICacheMonitorService
     {
         return cacheName switch
         {
-            "login_tokens" => "用户信息",
-            "sys_config" => "配置信息",
-            "sys_dict" => "数据字典",
-            "captcha_codes" => "验证码",
-            "repeat_submit" => "防重提交",
-            "rate_limit" => "限流处理",
-            "pwd_err_cnt" => "密码错误次数",
-            "online_user" => "在线用户",
-            "refresh_token" => "刷新令牌",
-            "user" => "用户缓存",
+            CacheConstants.CACHE_NAME_LOGIN_TOKENS => CacheConstants.CACHE_REMARK_LOGIN_TOKENS,
+            CacheConstants.CACHE_NAME_SYS_CONFIG => CacheConstants.CACHE_REMARK_SYS_CONFIG,
+            CacheConstants.CACHE_NAME_SYS_DICT => CacheConstants.CACHE_REMARK_SYS_DICT,
+            CacheConstants.CACHE_NAME_CAPTCHA => CacheConstants.CACHE_REMARK_CAPTCHA,
+            CacheConstants.CACHE_NAME_REPEAT_SUBMIT => CacheConstants.CACHE_REMARK_REPEAT_SUBMIT,
+            CacheConstants.CACHE_NAME_RATE_LIMIT => CacheConstants.CACHE_REMARK_RATE_LIMIT,
+            CacheConstants.CACHE_NAME_PWD_ERR_CNT => CacheConstants.CACHE_REMARK_PWD_ERR_CNT,
+            CacheConstants.CACHE_NAME_ONLINE_USER => CacheConstants.CACHE_REMARK_ONLINE_USER,
+            CacheConstants.CACHE_NAME_REFRESH_TOKEN => CacheConstants.CACHE_REMARK_REFRESH_TOKEN,
+            CacheConstants.CACHE_NAME_USER => CacheConstants.CACHE_REMARK_USER,
             _ => ""
         };
     }

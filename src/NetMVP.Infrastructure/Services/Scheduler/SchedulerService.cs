@@ -10,52 +10,81 @@ namespace NetMVP.Infrastructure.Services.Scheduler;
 /// </summary>
 public class SchedulerService : ISchedulerService
 {
-    private readonly IScheduler _scheduler;
+    private IScheduler? _scheduler;
+    private readonly ISchedulerFactory _schedulerFactory;
     private readonly ILogger<SchedulerService> _logger;
+    private readonly SemaphoreSlim _initLock = new(1, 1);
 
     public SchedulerService(ISchedulerFactory schedulerFactory, ILogger<SchedulerService> logger)
     {
-        _scheduler = schedulerFactory.GetScheduler().Result;
+        _schedulerFactory = schedulerFactory;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// 获取调度器实例（延迟初始化）
+    /// </summary>
+    private async Task<IScheduler> GetSchedulerAsync()
+    {
+        if (_scheduler != null) return _scheduler;
+
+        await _initLock.WaitAsync();
+        try
+        {
+            if (_scheduler == null)
+            {
+                _scheduler = await _schedulerFactory.GetScheduler();
+            }
+            return _scheduler;
+        }
+        finally
+        {
+            _initLock.Release();
+        }
     }
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
-        if (!_scheduler.IsStarted)
+        var scheduler = await GetSchedulerAsync();
+        if (!scheduler.IsStarted)
         {
-            await _scheduler.Start(cancellationToken);
+            await scheduler.Start(cancellationToken);
             _logger.LogInformation("调度器已启动");
         }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        if (!_scheduler.IsShutdown)
+        var scheduler = await GetSchedulerAsync();
+        if (!scheduler.IsShutdown)
         {
-            await _scheduler.Shutdown(cancellationToken);
+            await scheduler.Shutdown(cancellationToken);
             _logger.LogInformation("调度器已停止");
         }
     }
 
     public async Task PauseAsync(CancellationToken cancellationToken = default)
     {
-        await _scheduler.PauseAll(cancellationToken);
+        var scheduler = await GetSchedulerAsync();
+        await scheduler.PauseAll(cancellationToken);
         _logger.LogInformation("调度器已暂停");
     }
 
     public async Task ResumeAsync(CancellationToken cancellationToken = default)
     {
-        await _scheduler.ResumeAll(cancellationToken);
+        var scheduler = await GetSchedulerAsync();
+        await scheduler.ResumeAll(cancellationToken);
         _logger.LogInformation("调度器已恢复");
     }
 
     public async Task AddJobAsync(string jobName, string jobGroup, string cronExpression, 
         Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default)
     {
+        var scheduler = await GetSchedulerAsync();
         var jobKey = new JobKey(jobName, jobGroup);
 
         // 检查任务是否已存在
-        if (await _scheduler.CheckExists(jobKey, cancellationToken))
+        if (await scheduler.CheckExists(jobKey, cancellationToken))
         {
             throw new InvalidOperationException($"任务已存在: {jobName}.{jobGroup}");
         }
@@ -82,17 +111,18 @@ public class SchedulerService : ISchedulerService
             .WithCronSchedule(cronExpression)
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        await scheduler.ScheduleJob(job, trigger, cancellationToken);
         _logger.LogInformation("任务已添加: {JobName}.{JobGroup}, Cron: {CronExpression}", jobName, jobGroup, cronExpression);
     }
 
     public async Task UpdateJobAsync(string jobName, string jobGroup, string cronExpression, 
         Dictionary<string, object>? parameters = null, CancellationToken cancellationToken = default)
     {
+        var scheduler = await GetSchedulerAsync();
         var jobKey = new JobKey(jobName, jobGroup);
 
         // 检查任务是否存在
-        if (!await _scheduler.CheckExists(jobKey, cancellationToken))
+        if (!await scheduler.CheckExists(jobKey, cancellationToken))
         {
             throw new InvalidOperationException($"任务不存在: {jobName}.{jobGroup}");
         }
@@ -108,8 +138,9 @@ public class SchedulerService : ISchedulerService
 
     public async Task DeleteJobAsync(string jobName, string jobGroup, CancellationToken cancellationToken = default)
     {
+        var scheduler = await GetSchedulerAsync();
         var jobKey = new JobKey(jobName, jobGroup);
-        var deleted = await _scheduler.DeleteJob(jobKey, cancellationToken);
+        var deleted = await scheduler.DeleteJob(jobKey, cancellationToken);
 
         if (deleted)
         {
@@ -123,22 +154,25 @@ public class SchedulerService : ISchedulerService
 
     public async Task PauseJobAsync(string jobName, string jobGroup, CancellationToken cancellationToken = default)
     {
+        var scheduler = await GetSchedulerAsync();
         var jobKey = new JobKey(jobName, jobGroup);
-        await _scheduler.PauseJob(jobKey, cancellationToken);
+        await scheduler.PauseJob(jobKey, cancellationToken);
         _logger.LogInformation("任务已暂停: {JobName}.{JobGroup}", jobName, jobGroup);
     }
 
     public async Task ResumeJobAsync(string jobName, string jobGroup, CancellationToken cancellationToken = default)
     {
+        var scheduler = await GetSchedulerAsync();
         var jobKey = new JobKey(jobName, jobGroup);
-        await _scheduler.ResumeJob(jobKey, cancellationToken);
+        await scheduler.ResumeJob(jobKey, cancellationToken);
         _logger.LogInformation("任务已恢复: {JobName}.{JobGroup}", jobName, jobGroup);
     }
 
     public async Task TriggerJobAsync(string jobName, string jobGroup, CancellationToken cancellationToken = default)
     {
+        var scheduler = await GetSchedulerAsync();
         var jobKey = new JobKey(jobName, jobGroup);
-        await _scheduler.TriggerJob(jobKey, cancellationToken);
+        await scheduler.TriggerJob(jobKey, cancellationToken);
         _logger.LogInformation("任务已触发: {JobName}.{JobGroup}", jobName, jobGroup);
     }
 

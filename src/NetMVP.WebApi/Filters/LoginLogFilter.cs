@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using NetMVP.Application.DTOs.LoginInfo;
 using NetMVP.Application.Services;
 using NetMVP.Domain.Constants;
+using NetMVP.Infrastructure.Utils;
 
 namespace NetMVP.WebApi.Filters;
 
@@ -13,13 +14,16 @@ public class LoginLogFilter : IAsyncActionFilter
 {
     private readonly ISysLoginInfoService _loginInfoService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<LoginLogFilter> _logger;
 
     public LoginLogFilter(
         ISysLoginInfoService loginInfoService,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<LoginLogFilter> logger)
     {
         _loginInfoService = loginInfoService;
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -29,27 +33,27 @@ public class LoginLogFilter : IAsyncActionFilter
 
         // 只处理登录和登出请求
         var path = request.Path.Value?.ToLower() ?? "";
-        if (path != "/login" && path != "/logout")
+        if (path != SystemConstants.LOGIN_PATH && path != SystemConstants.LOGOUT_PATH)
         {
             await next();
             return;
         }
 
         // 获取客户端信息
-        var ipAddress = GetClientIpAddress(httpContext);
+        var ipAddress = IpUtils.GetIpAddress(httpContext);
         var browser = GetBrowser(httpContext);
         var os = GetOperatingSystem(httpContext);
 
         // 获取用户名
-        string userName = "未知用户";
-        if (path.Contains("/login") && context.ActionArguments.TryGetValue("dto", out var loginDto))
+        string userName = SystemConstants.UNKNOWN_USER;
+        if (path.Contains(SystemConstants.LOGIN_PATH) && context.ActionArguments.TryGetValue("dto", out var loginDto))
         {
             var dto = loginDto as dynamic;
-            userName = dto?.UserName ?? "未知用户";
+            userName = dto?.UserName ?? SystemConstants.UNKNOWN_USER;
         }
-        else if (path.Contains("/logout"))
+        else if (path.Contains(SystemConstants.LOGOUT_PATH))
         {
-            userName = httpContext.User.Identity?.Name ?? "未知用户";
+            userName = httpContext.User.Identity?.Name ?? SystemConstants.UNKNOWN_USER;
         }
 
         // 执行操作
@@ -60,7 +64,7 @@ public class LoginLogFilter : IAsyncActionFilter
         {
             UserName = userName,
             IpAddr = ipAddress,
-            LoginLocation = "内网IP",
+            LoginLocation = SystemConstants.INTERNAL_IP_LOCATION,
             Browser = browser,
             Os = os
         };
@@ -79,24 +83,24 @@ public class LoginLogFilter : IAsyncActionFilter
                 if (dict.TryGetValue("code", out var code) && code?.ToString() == "200")
                 {
                     logDto.Status = CommonConstants.SUCCESS;
-                    logDto.Msg = path.Contains("/login") ? "登录成功" : "退出成功";
+                    logDto.Msg = path.Contains(SystemConstants.LOGIN_PATH) ? SystemConstants.LOGIN_SUCCESS_MSG : SystemConstants.LOGOUT_SUCCESS_MSG;
                 }
                 else
                 {
                     logDto.Status = CommonConstants.FAIL;
-                    logDto.Msg = dict.TryGetValue("msg", out var msg) ? msg?.ToString() ?? "操作失败" : "操作失败";
+                    logDto.Msg = dict.TryGetValue("msg", out var msg) ? msg?.ToString() ?? SystemConstants.OPERATION_FAILED_MSG : SystemConstants.OPERATION_FAILED_MSG;
                 }
             }
             else
             {
                 logDto.Status = CommonConstants.SUCCESS;
-                logDto.Msg = path.Contains("/login") ? "登录成功" : "退出成功";
+                logDto.Msg = path.Contains(SystemConstants.LOGIN_PATH) ? SystemConstants.LOGIN_SUCCESS_MSG : SystemConstants.LOGOUT_SUCCESS_MSG;
             }
         }
         else
         {
             logDto.Status = CommonConstants.SUCCESS;
-            logDto.Msg = path.Contains("/login") ? "登录成功" : "退出成功";
+            logDto.Msg = path.Contains(SystemConstants.LOGIN_PATH) ? SystemConstants.LOGIN_SUCCESS_MSG : SystemConstants.LOGOUT_SUCCESS_MSG;
         }
 
         // 异步保存日志（不影响主流程）
@@ -106,26 +110,9 @@ public class LoginLogFilter : IAsyncActionFilter
         }
         catch (Exception ex)
         {
-            // 日志记录失败不影响业务，但记录到控制台以便调试
-            Console.WriteLine($"保存登录日志失败: {ex.Message}");
+            // 日志记录失败不影响业务，但记录错误日志以便追踪
+            _logger.LogError(ex, "保存登录日志失败");
         }
-    }
-
-    /// <summary>
-    /// 获取客户端IP地址
-    /// </summary>
-    private static string GetClientIpAddress(HttpContext context)
-    {
-        var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (string.IsNullOrEmpty(ip))
-        {
-            ip = context.Request.Headers["X-Real-IP"].FirstOrDefault();
-        }
-        if (string.IsNullOrEmpty(ip))
-        {
-            ip = context.Connection.RemoteIpAddress?.ToString();
-        }
-        return ip ?? "127.0.0.1";
     }
 
     /// <summary>

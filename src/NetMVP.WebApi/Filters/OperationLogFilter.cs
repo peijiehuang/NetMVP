@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using NetMVP.Application.DTOs.OperLog;
 using NetMVP.Application.Services;
 using NetMVP.Domain.Constants;
+using NetMVP.Infrastructure.Utils;
 using NetMVP.WebApi.Attributes;
 using System.Diagnostics;
 using System.Text.Json;
@@ -16,13 +17,16 @@ public class OperationLogFilter : IAsyncActionFilter
 {
     private readonly ISysOperLogService _operLogService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<OperationLogFilter> _logger;
 
     public OperationLogFilter(
         ISysOperLogService operLogService,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<OperationLogFilter> logger)
     {
         _operLogService = operLogService;
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -68,8 +72,8 @@ public class OperationLogFilter : IAsyncActionFilter
         }
 
         // 获取用户信息
-        var userName = httpContext.User.Identity?.Name ?? "匿名用户";
-        var ipAddress = GetClientIpAddress(httpContext);
+        var userName = httpContext.User.Identity?.Name ?? SystemConstants.ANONYMOUS_USER;
+        var ipAddress = IpUtils.GetIpAddress(httpContext);
 
         // 执行操作
         var executedContext = await next();
@@ -86,7 +90,7 @@ public class OperationLogFilter : IAsyncActionFilter
             OperName = userName,
             OperUrl = operUrl,
             OperIp = ipAddress,
-            OperLocation = "内网IP",
+            OperLocation = SystemConstants.INTERNAL_IP_LOCATION,
             OperParam = operParam,
             CostTime = stopwatch.ElapsedMilliseconds
         };
@@ -131,25 +135,8 @@ public class OperationLogFilter : IAsyncActionFilter
         }
         catch (Exception ex)
         {
-            // 日志记录失败不影响业务，但记录到控制台以便调试
-            Console.WriteLine($"保存操作日志失败: {ex.Message}");
+            // 日志记录失败不影响业务，但记录错误日志以便追踪
+            _logger.LogError(ex, "保存操作日志失败");
         }
-    }
-
-    /// <summary>
-    /// 获取客户端IP地址
-    /// </summary>
-    private static string GetClientIpAddress(HttpContext context)
-    {
-        var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (string.IsNullOrEmpty(ip))
-        {
-            ip = context.Request.Headers["X-Real-IP"].FirstOrDefault();
-        }
-        if (string.IsNullOrEmpty(ip))
-        {
-            ip = context.Connection.RemoteIpAddress?.ToString();
-        }
-        return ip ?? "127.0.0.1";
     }
 }
